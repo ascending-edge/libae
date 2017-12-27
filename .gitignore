@@ -5,8 +5,8 @@
 .libs
 Makefile
 Makefile.in
-ar-lib
 aclocal.m4
+ar-lib
 autom4te.cache
 compile
 config.guess
@@ -23,3 +23,4 @@ ltmain.sh
 m4
 missing
 stamp-h1
+test/ae-test
