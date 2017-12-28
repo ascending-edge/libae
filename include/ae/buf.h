@@ -5,8 +5,6 @@
 
 #include <ae/types.h>
 #include <ae/res.h>
-#include <ae/note.h>
-
 
 
 typedef struct ae_buf
@@ -16,7 +14,7 @@ typedef struct ae_buf
 	uint8_t buf[];
 } ae_buf_t;
 
-#define AE_BUF_ALLOCA(size)						\
+#define AE_BUF_ALLOCA(size)                                           \
 	ae_buf_init_from_self(alloca(sizeof(ae_buf_t) + size), size)
 
 
@@ -28,13 +26,9 @@ extern "C" {
 
 	ae_buf_t* ae_buf_init(ae_buf_t *self, void *buf, size_t len);
 
-	ae_res_t ae_buf_copy(ae_note_t *e,
-								ae_buf_t *dest,
-								const ae_buf_t *src);
-	ae_res_t ae_buf_copyp(ae_note_t *e,
-								 ae_buf_t *dest,
-								 size_t src_len,
-								 const void *src);
+	bool ae_buf_copy(ae_res_t *e, ae_buf_t *dest, const ae_buf_t *src);
+	bool ae_buf_copyp(ae_res_t *e, ae_buf_t *dest,
+                       size_t src_len, const void *src);
 	
 #ifdef __cplusplus
 }

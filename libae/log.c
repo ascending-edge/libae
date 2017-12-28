@@ -129,18 +129,21 @@ int ae_log_level_to_syslog(ae_log_level_t lvl)
 }
 
 
-void ae_log_note(ae_log_t *self, const ae_note_t *note)
+void ae_log_res(ae_log_t *self, const ae_res_t *res)
 {
-     if(note->info.count)
+     if(res->msg[AE_RES_N_INFO].count)
      {
-          ae_log(self, AE_LOG_LEVEL_INFO, "{%s}", note->info.msg);
+          ae_log(self, AE_LOG_LEVEL_INFO, "{%s}",
+                 res->msg[AE_LOG_LEVEL_INFO].msg);
      }
-     if(note->warn.count)
+     if(res->msg[AE_RES_N_WARN].count)
      {
-          ae_log(self, AE_LOG_LEVEL_WARN, "{%s}", note->warn.msg);
+          ae_log(self, AE_LOG_LEVEL_WARN, "{%s}",
+                 res->msg[AE_LOG_LEVEL_WARN].msg);
      }
-     if(note->err.count)
+     if(res->msg[AE_RES_N_ERR].count)
      {
-          ae_log(self, AE_LOG_LEVEL_ERR, "{%s}", note->err.msg);
+          ae_log(self, AE_LOG_LEVEL_ERR, "{%s}",
+                 res->msg[AE_LOG_LEVEL_ERR].msg);
      }
 }

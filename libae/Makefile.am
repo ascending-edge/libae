@@ -12,7 +12,7 @@ libae0_la_SOURCES = \
 	ae.c \
 	event.c \
 	log.c \
-	note.c \
+	res.c \
 	pool.c \
 	ptrarray.c \
 	str.c \
@@ -23,8 +23,9 @@ include_HEADERS = \
 	../include/ae/types.h \
 	../include/ae/buf.h \
 	../include/ae/log.h \
-	../include/ae/note.h \
 	../include/ae/pool.h \
 	../include/ae/ptrarray.h \
 	../include/ae/res.h \
+	../include/ae/try.h \
+	../include/ae/misc.h \
 	../include/ae/str.h 

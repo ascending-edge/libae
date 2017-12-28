@@ -2,10 +2,8 @@
 #define _AE_EVENT_H
 
 #include <ae/res.h>
-#include <ae/note.h>
 
 #include <sys/epoll.h>
-
 
 typedef struct ae_event
 {
@@ -30,22 +28,22 @@ typedef struct ae_event_data
 extern "C" {
 #endif
 
-     ae_res_t ae_event_uninit(ae_note_t *e, ae_event_t *self);
-     ae_res_t ae_event_init(ae_note_t *e, ae_event_t *self);
+     bool ae_event_uninit(ae_res_t *e, ae_event_t *self);
+     bool ae_event_init(ae_res_t *e, ae_event_t *self);
 
-     ae_res_t ae_event_add(ae_note_t *e, ae_event_t *self,
-                           int fd,
-                           uint32_t events,
-                           ae_event_data_t *d);
+     bool ae_event_add(ae_res_t *e, ae_event_t *self,
+                       int fd,
+                       uint32_t events,
+                       ae_event_data_t *d);
 
      /* rm */
      /* mod */
      /* get count */
-     ae_res_t ae_event_wait(ae_note_t *e, ae_event_t *self,
-                            struct epoll_event *events,
-                            size_t n_events,
-                            int timeout_ms,
-                            bool *out_was_timeout);
+     bool ae_event_wait(ae_res_t *e, ae_event_t *self,
+                        struct epoll_event *events,
+                        size_t n_events,
+                        int timeout_ms,
+                        bool *out_was_timeout);
 
 #ifdef __cplusplus
 }

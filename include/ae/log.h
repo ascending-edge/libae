@@ -4,8 +4,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 
-#include <ae/note.h>
-
+#include <ae/res.h>
 
 typedef enum ae_log_level
 {
@@ -34,9 +33,9 @@ extern "C" {
      ae_log_t *g_ae_logger;
      ae_log_t g_ae_log;
 
-#    define AE_LN AE_LOG_NOTE     
-#    define AE_LOG_NOTE(note)                   \
-     ae_log_note(g_ae_logger, (note))
+#    define AE_LN AE_LOG_RES     
+#    define AE_LOG_RES(res)                   \
+     ae_log_res(g_ae_logger, (res))
      
 #    define AE_LOG(lvl, ...)                                            \
      if(g_ae_logger->mask & lvl) ae_log(g_ae_logger, lvl, __VA_ARGS__)
@@ -72,7 +71,7 @@ extern "C" {
                   const char *fmt,
                   va_list args);
 
-     void ae_log_note(ae_log_t *self, const ae_note_t *note);
+     void ae_log_res(ae_log_t *self, const ae_res_t *res);
 
      const char* ae_log_level_to_string(ae_log_level_t lvl);
      int ae_log_level_to_syslog(ae_log_level_t lvl);
