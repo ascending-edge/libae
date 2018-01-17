@@ -44,11 +44,11 @@ typedef struct ae_res
 extern "C" {
 #endif
 
-     
-     
      void ae_res_init(ae_res_t *self);
+     void ae_res_clear(ae_res_t *self);
 
-     void ae_res_addv(ae_res_t *self, ae_res_n_t type, va_list args);
+     void ae_res_addv(ae_res_t *self, ae_res_n_t type,
+                      const char *fmt, va_list args);
      void ae_res_add(ae_res_t *self, ae_res_n_t type, const char *fmt, ...)
 #if __GNUC__
           __attribute__ ((format (printf, 3, 4)))

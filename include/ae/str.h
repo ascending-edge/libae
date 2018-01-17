@@ -7,11 +7,11 @@
 #define AE_STR_CP(dest, src)                    \
      strncpy((dest), (src), sizeof(dest))
 
-#define STR_PRINTV(buf, fmt, args)                 \
+#define AE_STR_PRINTV(buf, fmt, args)                 \
      ae_str_printv((buf),(sizeof(buf)), fmt, args)
 
 
-#define STR_PRINTF(buf, fmt, ...)                          \
+#define AE_STR_PRINTF(buf, fmt, ...)                          \
      ae_str_printf((buf),(sizeof(buf)), fmt, __VA_ARGS__)
 
 

@@ -5,13 +5,20 @@
 
 bool ae_pool_init(ae_res_t *e, ae_pool_t *self)
 {
+#if HAVE_OBSTACK_H     
      obstack_init(self);
+#else
+     ae_res_err(e, "not implemented");
+     return false;
+#endif  /* HAVE_OBSTACK_H */
+
      return true;
 }
 
 
 bool ae_pool_alloc(ae_res_t *e, ae_pool_t *self, void *_out, size_t len)
 {
+#if HAVE_OBSTACK_H     
      void **out = _out;
      *out = obstack_alloc(self, len);
      if(!(*out))
@@ -20,6 +27,10 @@ bool ae_pool_alloc(ae_res_t *e, ae_pool_t *self, void *_out, size_t len)
           return false;
      }
      *out = obstack_finish(self);
+#else
+     ae_res_err(e, "not implemented");
+     return false;
+#endif  /* HAVE_OBSTACK_H */
      return true;
 }
 
@@ -28,6 +39,7 @@ bool ae_pool_realloc(ae_res_t *e, ae_pool_t *self,
                      void *src, size_t src_len,
                      void *_dest, size_t dest_len)
 {
+#if HAVE_OBSTACK_H     
      void **out = _dest;
      
      /* Must reallocate! */
@@ -55,12 +67,31 @@ bool ae_pool_realloc(ae_res_t *e, ae_pool_t *self,
 
      /* Since we're at the top of the memory pool we can grow.    */
      obstack_blank(self, dest_len - src_len);
+#else
+     ae_res_err(e, "not implemented");
+     return false;
+#endif  /* HAVE_OBSTACK_H */
      return true;
 }
 
 
 bool ae_pool_uninit(ae_res_t *e, ae_pool_t *self)
 {
+#if HAVE_OBSTACK_H     
      obstack_free(self, NULL);
+#else
+     ae_res_err(e, "not implemented");
+     return false;
+#endif  /* HAVE_OBSTACK_H */
      return true;
 }
+
+bool ae_pool_strdup(ae_res_t *e, ae_pool_t *self,
+                    const char *src, char **out)
+{
+     size_t len = strlen(src) + 1;
+     AE_TRY(ae_pool_alloc(e, self, out, len));
+     memcpy(*out, src, len);
+     return true;
+}
+

@@ -5,7 +5,6 @@
 
 #include <unistd.h>
 #include <time.h>
-#include <config.h>
 
 #include <ae/try.h>
 
@@ -48,13 +47,39 @@ bool ae_event_init(ae_res_t *e, ae_event_t *self)
 
 
 bool ae_event_add(ae_res_t *e, ae_event_t *self,
-                      int fd,
-                      uint32_t events,
-                      ae_event_data_t *d)
+                  int fd,
+                  const ae_event_data_t *d)
 {
+     uint32_t events = 0;
+     if(d->read)
+     {
+          events |= EPOLLIN;
+     }
+     if(d->write)
+     {
+          events |= EPOLLOUT;
+     }
+     if(d->write)
+     {
+          events |= EPOLLOUT;
+     }
+     if(d->hangup)
+     {
+          events |= EPOLLRDHUP;
+     }
+     if(d->priority)
+     {
+          events |= EPOLLPRI;
+     }
+     /* EPOLLERR is not needed to be set in the events flags, it is
+      * automatic. */
+     /* if(d->error) */
+     /* { */
+     /* } */
+
 	struct epoll_event event;
      event.events = events;
-     event.data.ptr = d;
+     event.data.ptr = (void*)d;
 
      /* fprintf(stderr, "cb=%p ctx=%p\n", info->cb, info->ctx); */
      
@@ -154,11 +179,41 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
 	for(int i=0; i<res; ++i)
 	{
           struct epoll_event *event = &events[i];
+          uint32_t events = event->events;
 		ae_event_data_t *info = event->data.ptr;
-          fprintf(stderr, "cb=%p ctx=%p\n", info->cb, info->ctx);
-		info->cb(self, event, info->ctx);
+          if((events & EPOLLIN)
+             && info->read)
+          {
+               info->read(self, event, info->ctx);
+          }
+          if((events & EPOLLOUT)
+             && info->write)
+          {
+               info->write(self, event, info->ctx);
+          }
+          if(((events & EPOLLRDHUP)
+              || events & EPOLLHUP)
+             && info->hangup)
+          {
+               info->hangup(self, event, info->ctx);
+          }
+          if((events & EPOLLPRI)
+             && info->priority)
+          {
+               info->priority(self, event, info->ctx);
+          }
+          if((events & EPOLLERR)
+             && info->error)
+          {
+               info->error(self, event, info->ctx);
+          }
 	}
 	return true;
+}
+
+int ae_event_get_n_registered(ae_event_t *self)
+{
+     return self->count;
 }
 
 

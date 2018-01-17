@@ -33,7 +33,7 @@ extern "C" {
      ae_log_t *g_ae_logger;
      ae_log_t g_ae_log;
 
-#    define AE_LN AE_LOG_RES     
+#    define AE_LR AE_LOG_RES     
 #    define AE_LOG_RES(res)                   \
      ae_log_res(g_ae_logger, (res))
      

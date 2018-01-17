@@ -134,16 +134,16 @@ void ae_log_res(ae_log_t *self, const ae_res_t *res)
      if(res->msg[AE_RES_N_INFO].count)
      {
           ae_log(self, AE_LOG_LEVEL_INFO, "{%s}",
-                 res->msg[AE_LOG_LEVEL_INFO].msg);
+                 res->msg[AE_RES_N_INFO].msg);
      }
      if(res->msg[AE_RES_N_WARN].count)
      {
           ae_log(self, AE_LOG_LEVEL_WARN, "{%s}",
-                 res->msg[AE_LOG_LEVEL_WARN].msg);
+                 res->msg[AE_RES_N_WARN].msg);
      }
      if(res->msg[AE_RES_N_ERR].count)
      {
           ae_log(self, AE_LOG_LEVEL_ERR, "{%s}",
-                 res->msg[AE_LOG_LEVEL_ERR].msg);
+                 res->msg[AE_RES_N_ERR].msg);
      }
 }

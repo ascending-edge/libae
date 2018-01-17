@@ -18,8 +18,12 @@ typedef void (*ae_event_cb_t)(ae_event_t *self,
 
 typedef struct ae_event_data
 {
-     ae_event_cb_t cb;
      void *ctx;
+     ae_event_cb_t read;
+     ae_event_cb_t write;
+     ae_event_cb_t hangup;
+     ae_event_cb_t priority;
+     ae_event_cb_t error;
 } ae_event_data_t;
 
 
@@ -33,8 +37,9 @@ extern "C" {
 
      bool ae_event_add(ae_res_t *e, ae_event_t *self,
                        int fd,
-                       uint32_t events,
-                       ae_event_data_t *d);
+                       const ae_event_data_t *d);
+
+     int ae_event_get_n_registered(ae_event_t *self);
 
      /* rm */
      /* mod */

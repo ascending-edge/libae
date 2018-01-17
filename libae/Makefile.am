@@ -17,15 +17,17 @@ libae0_la_SOURCES = \
 	ptrarray.c \
 	str.c \
 	buf.c
-
-include_HEADERS = \
+headerdir = $(prefix)/include/ae
+header_DATA = \
 	../include/ae/ae.h \
-	../include/ae/types.h \
 	../include/ae/buf.h \
+	../include/ae/event.h \
 	../include/ae/log.h \
+	../include/ae/misc.h \
 	../include/ae/pool.h \
 	../include/ae/ptrarray.h \
 	../include/ae/res.h \
+	../include/ae/str.h \
 	../include/ae/try.h \
-	../include/ae/misc.h \
-	../include/ae/str.h 
+	../include/ae/types.h
+

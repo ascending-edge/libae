@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <config.h>
 #include <ae/ae.h>
 
 
@@ -24,11 +23,11 @@ static bool ae_test_event(ae_res_t *e)
      uint32_t foo = 68;
      ae_event_t event;
      ae_event_data_t data;
-     data.cb = ae_test_event_read;
+     data.read = ae_test_event_read;
      data.ctx = &foo;
      AE_TRY(ae_event_init(e, &event));
 
-     AE_TRY(ae_event_add(e, &event, fileno(stdin), EPOLLIN, &data));
+     AE_TRY(ae_event_add(e, &event, fileno(stdin), &data));
 
      struct epoll_event events[1];
      bool was_timeout = false;
@@ -83,7 +82,6 @@ void log_out(void *ctx, ae_log_level_t lvl, const char *msg)
 }
 
 
-#include <obstack.h>
 int main(int argc, char *argv[])
 {
      ae_res_t e;
@@ -98,12 +96,12 @@ int main(int argc, char *argv[])
      
      if(ae_test_main(&e))
      {
-          AE_LN(&e);
+          AE_LR(&e);
      }
 
      if(ae_global_uninit(&e))
      {
-          AE_LN(&e);
+          AE_LR(&e);
           return 1;
      }
      return 0;

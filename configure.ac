@@ -14,7 +14,9 @@ AC_SUBST([LIBAE_AGE], libae_version_age)
 AC_DEFINE([LIBAE_MAJOR], libae_version_major, [Major Version])
 AC_DEFINE([LIBAE_MINOR], libae_version_minor, [Minor Version])
 AC_DEFINE([LIBAE_AGE], libae_version_age, [Age])
-AC_CONFIG_HEADERS([config.h])
+
+
+
 
 AM_PROG_AR
 LT_INIT
@@ -23,6 +25,8 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_PROG_CC
 AC_CHECK_SIZEOF([void*])
+AC_CHECK_HEADERS([obstack.h])
+#AC_CONFIG_HEADERS([config.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CONFIG_FILES([Makefile libae/Makefile test/Makefile])

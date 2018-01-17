@@ -1,16 +1,16 @@
 #ifndef _AE_H
 #define _AE_H
 
+#include <ae/buf.h>
+#include <ae/event.h>
 #include <ae/log.h>
-#include <ae/res.h>
-#include <ae/str.h>
+#include <ae/misc.h>
 #include <ae/pool.h>
 #include <ae/ptrarray.h>
-#include <ae/buf.h>
-#include <ae/types.h>
-#include <ae/event.h>
+#include <ae/res.h>
+#include <ae/str.h>
 #include <ae/try.h>
-#include <ae/misc.h>
+#include <ae/types.h>
 
 #ifdef __cplusplus
 extern "C" {
