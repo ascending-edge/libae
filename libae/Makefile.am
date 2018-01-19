@@ -13,6 +13,7 @@ libae0_la_SOURCES = \
 	event.c \
 	log.c \
 	res.c \
+	opt.c \
 	pool.c \
 	ptrarray.c \
 	str.c \
@@ -24,6 +25,7 @@ header_DATA = \
 	../include/ae/event.h \
 	../include/ae/log.h \
 	../include/ae/misc.h \
+	../include/ae/opt.h \
 	../include/ae/pool.h \
 	../include/ae/ptrarray.h \
 	../include/ae/res.h \
