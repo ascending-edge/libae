@@ -4,17 +4,18 @@
 #include <ae/misc.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 
 bool ae_opt_init(ae_res_t *e, ae_opt_t *self,
                  const char *name,
+                 const char *version,
                  const char *help,
-                 ae_opt_callback_t cb,
-                 void *ctx,
-                 size_t options_len,
-                 const ae_opt_option_t *options)
+                 ae_opt_callback_t cb, void *ctx,
+                 size_t options_len, const ae_opt_option_t *options)
 {
      self->program_name = name;
+     self->version = version;
      self->help = help;
      self->callback = cb;
      self->ctx = ctx;
@@ -143,6 +144,34 @@ static bool ae_opt_parse_int(ae_res_t *e, ae_opt_t *self,
      return true;
 }
 
+static bool ae_opt_parse_bit(ae_res_t *e, ae_opt_t *self,
+                             const ae_opt_option_t *option,
+                             const char *arg)
+{
+     uintptr_t which_bits = (uintptr_t)option->in;
+     unsigned int *out = option->out;
+
+     if(!out)
+     {
+          ae_res_err(e, "programmer error: '%s' null output argument",
+                     option->name);
+          return false;
+     }
+
+     *out |=  which_bits;
+     return true;
+}
+
+
+static bool ae_opt_parse_string(ae_res_t *e, ae_opt_t *self,
+                                const ae_opt_option_t *option,
+                                const char *arg)
+{
+     char **out = option->out;
+     *out = (char*)arg;
+     return true;
+}
+
 
 static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
                                   int argc, char **argv,
@@ -155,6 +184,7 @@ static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
      switch(option->required)
      {
      case AE_OPT_NONE:
+     case AE_OPT_BIT:
           if(arg)
           {
                ae_res_err(e, "'%s' must not have an argument", option->name);
@@ -162,6 +192,7 @@ static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
           }
           break;
      case AE_OPT_REQUIRED:
+     case AE_OPT_STRING:
           arg_ok = true;
           if(!arg)
           {
@@ -170,6 +201,8 @@ static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
           }
           break;
      case AE_OPT_OPTIONAL:
+     case AE_OPT_HELP:
+     case AE_OPT_VERSION:
      case AE_OPT_INT:
      case AE_OPT_BOOL:
           arg_ok = true;
@@ -191,12 +224,26 @@ static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
      /* Is this something we handle internally? */
      switch(option->required)
      {
+     case AE_OPT_HELP:
+          ae_opt_help_print(self, stdout);
+          exit(0);
+          break;
+     case AE_OPT_VERSION:
+          ae_opt_version_print(self, stdout);
+          exit(0);
+          break;
      case AE_OPT_BOOL:
           AE_TRY(ae_opt_parse_bool(e, self, option, arg));
           break;
      case AE_OPT_INT:
           AE_TRY(ae_opt_parse_int(e, self, option, arg));
           break;
+     case AE_OPT_STRING:
+          AE_TRY(ae_opt_parse_string(e, self, option, arg));
+          break;
+     case AE_OPT_BIT:
+          AE_TRY(ae_opt_parse_bit(e, self, option, arg));
+          break;          
      }
 
      if(option->callback)
@@ -237,7 +284,6 @@ static void ae_opt_help_print_option_int(const ae_opt_t *self,
                                          size_t longest,
                                          const ae_opt_option_t *option)
 {
-     const char *type = "[int]";
      /* min, max, default */
      char params[256] = {0};
      if(option->in)
@@ -249,8 +295,8 @@ static void ae_opt_help_print_option_int(const ae_opt_t *self,
           sprintf(params, " (min: %d, max: %d, default: %d)", min, max, def);
      }                  
 
-     fprintf(out, "  --%-*s - %+10s - %s%s\n",
-             longest, option->name, type, option->help, params);
+     fprintf(out, "  --%-*s - %s%s\n",
+             longest, option->name, option->help, params);
      
 }
 
@@ -260,27 +306,23 @@ static void ae_opt_help_print_option(const ae_opt_t *self,
                                      size_t longest,
                                      const ae_opt_option_t *option)
 {
-     const char *type = "";
      switch(option->required)
      {
-     case AE_OPT_OPTIONAL:
-          type = "[string]";
-          break;
-     case AE_OPT_REQUIRED:
-          type = "<string>";          
-          break;
-     case AE_OPT_BOOL:
-          type = "[boolean]";
-          break;
      case AE_OPT_INT:
           ae_opt_help_print_option_int(self, out, longest, option);
           return;
           break;
      }
-     fprintf(out, "  --%-*s - %+10s - %s\n",
-             longest, option->name, type, option->help);
+     fprintf(out, "  --%-*s - %s\n", longest, option->name, option->help);
 }
 
+
+void ae_opt_version_print(const ae_opt_t *self, FILE *out)
+{
+     fprintf(out, "%s %s\n", self->program_name, self->version);
+}
+
+     
 void ae_opt_help_print(const ae_opt_t *self, FILE *out)
 {
      fprintf(out, "Usage %s: %s\n", self->program_name, self->help);

@@ -1,36 +1,31 @@
 #include <ae/pool.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 #include <ae/log.h>
 #include <ae/try.h>
 
 bool ae_pool_init(ae_res_t *e, ae_pool_t *self)
 {
-#if HAVE_OBSTACK_H     
-     obstack_init(self);
-#else
-     ae_res_err(e, "not implemented");
-     return false;
-#endif  /* HAVE_OBSTACK_H */
-
+/* |MAP_UNINITIALIZED      */
+     self->len = getpagesize();
+     self->base = mmap(NULL, self->len,
+                       PROT_READ|PROT_WRITE,
+                       MAP_PRIVATE|MAP_ANONYMOUS,
+                       -1, 0);
+     if(self->base == MAP_FAILED)
+     {
+          ae_res_err(e, "mmap: %s", strerror(errno));
+          return false;
+     }
      return true;
 }
 
 
 bool ae_pool_alloc(ae_res_t *e, ae_pool_t *self, void *_out, size_t len)
 {
-#if HAVE_OBSTACK_H     
-     void **out = _out;
-     *out = obstack_alloc(self, len);
-     if(!(*out))
-     {
-          ae_res_err(e, "error allocating %zu bytes", len);
-          return false;
-     }
-     *out = obstack_finish(self);
-#else
-     ae_res_err(e, "not implemented");
-     return false;
-#endif  /* HAVE_OBSTACK_H */
+     /* figure out the address is the address insize of the allocated
+      * range?  If not compute how much to grow.*/
      return true;
 }
 
@@ -39,59 +34,26 @@ bool ae_pool_realloc(ae_res_t *e, ae_pool_t *self,
                      void *src, size_t src_len,
                      void *_dest, size_t dest_len)
 {
-#if HAVE_OBSTACK_H     
-     void **out = _dest;
-     
-     /* Must reallocate! */
-     if(obstack_base(self) != src)
-     {
-          AE_TRY(ae_pool_alloc(e, self, out, dest_len));
-          memcpy(*out, src, src_len);
-          return true;
-     }
-
-     if(dest_len < src_len)
-     {
-          ae_res_err(e, "shrinking is not supported (dest=%zu, src=%zu)",
-                     dest_len, src_len);
-          return false;
-     }
-     
-     *out = src;
-
-     /* Do nothing! */
-     if(dest_len == src_len)
-     {
-          return true;
-     }
-
-     /* Since we're at the top of the memory pool we can grow.    */
-     obstack_blank(self, dest_len - src_len);
-#else
-     ae_res_err(e, "not implemented");
+     ae_res_err(e, "%s: not yet implemented", __FUNCTION__);
      return false;
-#endif  /* HAVE_OBSTACK_H */
-     return true;
 }
 
 
 bool ae_pool_uninit(ae_res_t *e, ae_pool_t *self)
 {
-#if HAVE_OBSTACK_H     
-     obstack_free(self, NULL);
-#else
-     ae_res_err(e, "not implemented");
-     return false;
-#endif  /* HAVE_OBSTACK_H */
+     if(munmap(self->base, self->len) == -1)
+     {
+          ae_res_warn(e, "munmap: %s", strerror(errno));
+          return true;
+     }
      return true;
 }
+
 
 bool ae_pool_strdup(ae_res_t *e, ae_pool_t *self,
                     const char *src, char **out)
 {
-     size_t len = strlen(src) + 1;
-     AE_TRY(ae_pool_alloc(e, self, out, len));
-     memcpy(*out, src, len);
-     return true;
+     ae_res_err(e, "not yet implemented");
+     return false;
 }
 

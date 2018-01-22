@@ -2,7 +2,7 @@
 #define _OPT_H
 
 #include <ae/res.h>
-
+#include <stdint.h>
 #include <stdio.h>
 
 typedef enum ae_opt_callback_reason
@@ -16,8 +16,12 @@ typedef enum ae_opt_required
      AE_OPT_NONE=0,
      AE_OPT_OPTIONAL,     
      AE_OPT_REQUIRED,
+     AE_OPT_HELP,
+     AE_OPT_VERSION,
      AE_OPT_BOOL,
      AE_OPT_INT,
+     AE_OPT_STRING,
+     AE_OPT_BIT,
 
      AE_OPT_GROUP,
      AE_OPT_ENDMARKER,
@@ -55,6 +59,7 @@ typedef struct ae_opt
 {
      const char *program_name;
      const char *help;
+     const char *version;
 
      ae_opt_callback_t callback;
      void *ctx;
@@ -74,15 +79,15 @@ extern "C" {
      /* there is no uninit */
      bool ae_opt_init(ae_res_t *e, ae_opt_t *self,
                       const char *name,
+                      const char *version,
                       const char *help,
-                      ae_opt_callback_t cb,
-                      void *ctx,
-                      size_t options_len,
-                      const ae_opt_option_t *options);
+                      ae_opt_callback_t cb, void *ctx,
+                      size_t options_len, const ae_opt_option_t *options);
 
      bool ae_opt_process(ae_res_t *e, ae_opt_t *self, int argc, char **argv);
 
      void ae_opt_help_print(const ae_opt_t *self, FILE *out);
+     void ae_opt_version_print(const ae_opt_t *self, FILE *out);
 
 #ifdef __cplusplus
 }

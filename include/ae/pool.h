@@ -3,18 +3,14 @@
 
 #include <ae/res.h>
 
-#include <malloc.h>
+typedef struct ae_pool
+{
+     size_t len;
+     uint8_t *base;
 
-#if HAVE_OBSTACK_H
-#    include <obstack.h>
-#    define obstack_chunk_alloc malloc
-#    define obstack_chunk_free free
-typedef struct obstack ae_pool_t;
-#else
-/* just a placeholder... */
-typedef int ae_pool_t;
-#endif  /* HAVE_OBSTACK_H */
-
+     size_t bytes_allocated;
+     uint8_t *next;
+} ae_pool_t;
 
 
 
