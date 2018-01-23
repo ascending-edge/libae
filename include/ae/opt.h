@@ -11,20 +11,27 @@ typedef enum ae_opt_callback_reason
      AE_OPT_CALLBACK_REASON_ENDMARKER
 } ae_opt_callback_reason_t;
 
-typedef enum ae_opt_required
+typedef enum ae_opt_type
 {
-     AE_OPT_NONE=0,
-     AE_OPT_OPTIONAL,     
-     AE_OPT_REQUIRED,
-     AE_OPT_HELP,
-     AE_OPT_VERSION,
-     AE_OPT_BOOL,
-     AE_OPT_INT,
-     AE_OPT_STRING,
-     AE_OPT_BIT,
-
-     AE_OPT_GROUP,
+     AE_OPT_TYPE_HELP,
+     AE_OPT_TYPE_VERSION,
+     AE_OPT_TYPE_FLAG,
+     AE_OPT_TYPE_INT,
+     AE_OPT_TYPE_DOUBLE,
+     AE_OPT_TYPE_STRING,
+     AE_OPT_TYPE_BIT,
+     AE_OPT_TYPE_GROUP,
+     
      AE_OPT_ENDMARKER,
+} ae_opt_type_t;
+
+typedef enum ae_opt_param
+{
+     AE_OPT_PARAM_NONE=0,
+     AE_OPT_PARAM_OPTIONAL,     
+     AE_OPT_PARAM_REQUIRED,
+
+     AE_OPT_PARAM_ENDMARKER,
 } ae_opt_required_t;
 
 
@@ -44,8 +51,10 @@ typedef bool (*ae_opt_callback_t)(ae_res_t *e,
 typedef struct ae_opt_option
 {
      const char *name;
-     const char *help;     
-     ae_opt_required_t required;
+     const char *help;
+     const char *help_param;
+     ae_opt_type_t type;
+     ae_opt_required_t is_required;
 
      void *in;
      void *out;
