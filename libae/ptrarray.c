@@ -1,6 +1,7 @@
 #include <ae/ptrarray.h>
 #include <ae/try.h>
 
+
 bool ae_ptrarray_grow_capacity(ae_res_t *e, ae_ptrarray_t *self,
                                size_t increase_by)
 {
@@ -60,7 +61,6 @@ bool ae_ptrarray_append(ae_res_t *e, ae_ptrarray_t *self, void *item)
      self->data[self->len++] = item;
      return true;
 }
-
 
 
 void ae_ptrarray_remove(ae_ptrarray_t *self, size_t index)

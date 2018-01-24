@@ -5,6 +5,7 @@
 #include <ae/log.h>
 #include <ae/try.h>
 
+
 bool ae_pool_init(ae_res_t *e, ae_pool_t *self)
 {
 /* |MAP_UNINITIALIZED      */

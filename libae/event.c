@@ -8,6 +8,7 @@
 
 #include <ae/try.h>
 
+
 bool ae_event_uninit(ae_res_t *e, ae_event_t *self)
 {
 	if(close(self->epoll_fd) != 0)
@@ -210,6 +211,7 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
 	}
 	return true;
 }
+
 
 int ae_event_get_n_registered(ae_event_t *self)
 {

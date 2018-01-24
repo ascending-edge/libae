@@ -13,6 +13,8 @@ ae_log_t g_ae_log =
      .ctx = NULL
 };
 
+/* This doesn't seem to happen on ARM when used in a shared
+ * library. */
 ae_log_t *g_ae_logger = &g_ae_log;
 
 
@@ -77,7 +79,6 @@ void ae_log(ae_log_t *self, ae_log_level_t lvl, const char *fmt, ...)
 }
 
 
-
 const char* ae_log_level_to_string(ae_log_level_t lvl)
 {
      switch(lvl)
@@ -102,6 +103,7 @@ const char* ae_log_level_to_string(ae_log_level_t lvl)
      }
      return "***invalid***";
 }
+
 
 int ae_log_level_to_syslog(ae_log_level_t lvl)
 {

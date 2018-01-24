@@ -19,6 +19,7 @@ size_t ae_str_printv(char *buf, size_t bufLen, const char *fmt, va_list args)
      return res;
 }
 
+
 size_t ae_str_printf(char *buf, size_t bufLen, const char *fmt, ...)
 {
      va_list args;

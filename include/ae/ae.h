@@ -1,3 +1,11 @@
+/**
+ * @author Greg Rowe <greg.rowe@ascending-edge.com>
+ *
+ * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
+ * 
+ * Users should be able to include just this header to get all libae
+ * definitions.
+ */
 #ifndef _AE_H
 #define _AE_H
 
@@ -17,9 +25,22 @@
 extern "C" {
 #endif
 
+     /** 
+      * This performs all required global initialization.
+      *
+      * @param log_handler function to call for log messages
+      * 
+      * @param log_ctx context for @p log_handler
+      */
      bool ae_global_init(ae_res_t *e,
                          ae_log_handler_t log_handler,
                          void *log_ctx);
+
+
+     /** 
+      * This performs all cleanup.  This is currently an empty
+      * implementation.
+      */
      bool ae_global_uninit(ae_res_t *e);
 
 #ifdef __cplusplus

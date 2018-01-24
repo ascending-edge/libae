@@ -12,6 +12,7 @@ static const char *s_PARAM_BRACES[][2] = {
      {"<", ">"},
 };
 
+
 bool ae_opt_init(ae_res_t *e, ae_opt_t *self,
                  const char *name,
                  const char *version,
@@ -65,6 +66,7 @@ static bool ae_opt_parse_flag(ae_res_t *e, ae_opt_t *self,
      return true;
 }
 
+
 static bool ae_opt_parse_int(ae_res_t *e, ae_opt_t *self,
                               const ae_opt_option_t *option,
                               const char *arg)
@@ -114,6 +116,7 @@ static bool ae_opt_parse_int(ae_res_t *e, ae_opt_t *self,
      }
      return true;
 }
+
 
 static bool ae_opt_parse_double(ae_res_t *e, ae_opt_t *self,
                                 const ae_opt_option_t *option,
@@ -166,6 +169,7 @@ static bool ae_opt_parse_double(ae_res_t *e, ae_opt_t *self,
      return true;
 }
 
+
 static bool ae_opt_parse_bit(ae_res_t *e, ae_opt_t *self,
                              const ae_opt_option_t *option,
                              const char *arg)
@@ -185,6 +189,36 @@ static bool ae_opt_parse_bit(ae_res_t *e, ae_opt_t *self,
 }
 
 
+static bool ae_opt_parse_counter(ae_res_t *e, ae_opt_t *self,
+                                 const ae_opt_option_t *option,
+                                 const char *arg)
+{
+     int *out = option->out;
+
+     if(!out)
+     {
+          ae_res_err(e, "programmer error: '%s' null output argument",
+                     option->name);
+          return false;
+     }
+
+     if(!arg)
+     {
+          ++(*out);
+          return true;
+     }
+
+     int tmp = 0;
+     if(sscanf(arg, "%d", &tmp) != 1)
+     {
+          ae_res_err(e, "'%s': '%s' is not an integer", option->name, arg);
+          return true;
+     }
+     *out += tmp;
+     return true;
+}
+
+
 static bool ae_opt_parse_string(ae_res_t *e, ae_opt_t *self,
                                 const ae_opt_option_t *option,
                                 const char *arg)
@@ -196,15 +230,13 @@ static bool ae_opt_parse_string(ae_res_t *e, ae_opt_t *self,
 
 
 static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
-                                  int argc, char **argv,
+                                  const char *param,
                                   const ae_opt_option_t *option)
 {
-     const char *arg = ae_opt_arg_get(self, argc, argv);
-
      /* Deal with argument logic */
      bool arg_ok = (option->is_required == AE_OPT_PARAM_NONE) ? false:true;
      if(arg_ok
-        && arg)
+        && param)
      {
           ++self->optind;
      }
@@ -221,28 +253,32 @@ static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
           exit(0);
           break;
      case AE_OPT_TYPE_FLAG:
-          AE_TRY(ae_opt_parse_flag(e, self, option, arg));
+          AE_TRY(ae_opt_parse_flag(e, self, option, param));
           break;
      case AE_OPT_TYPE_INT:
-          AE_TRY(ae_opt_parse_int(e, self, option, arg));
+          AE_TRY(ae_opt_parse_int(e, self, option, param));
           break;
      case AE_OPT_TYPE_DOUBLE:
-          AE_TRY(ae_opt_parse_double(e, self, option, arg));
+          AE_TRY(ae_opt_parse_double(e, self, option, param));
           break;          
      case AE_OPT_TYPE_STRING:
-          AE_TRY(ae_opt_parse_string(e, self, option, arg));
+          AE_TRY(ae_opt_parse_string(e, self, option, param));
           break;
      case AE_OPT_TYPE_BIT:
-          AE_TRY(ae_opt_parse_bit(e, self, option, arg));
-          break;          
+          AE_TRY(ae_opt_parse_bit(e, self, option, param));
+          break;
+     case AE_OPT_TYPE_COUNTER:
+          AE_TRY(ae_opt_parse_counter(e, self, option, param));
+          break;
      }
 
      if(option->callback)
      {
-          AE_TRY(option->callback(e, self, option, arg));
+          AE_TRY(option->callback(e, self, option, param));
      }
      return true;
 }
+
 
 static int ae_opt_format_option_field1(const ae_opt_option_t *option,
                                        size_t out_len,
@@ -260,7 +296,6 @@ static int ae_opt_format_option_field1(const ae_opt_option_t *option,
      }
      return snprintf(out, out_len, "%s%s", option->name, param_help);
 }
-
 
 
 static size_t ae_opt_field1_width(const ae_opt_option_t *option)
@@ -310,8 +345,6 @@ static size_t ae_opt_group_get_longest(const ae_opt_t *self, size_t ix)
      }
      return longest;
 }
-
-
 
 
 static void ae_opt_help_print_option_int(const ae_opt_t *self,
@@ -381,6 +414,21 @@ static void ae_opt_help_print_option_string(const ae_opt_t *self,
 }
 
 
+static void ae_opt_help_print_option_counter(const ae_opt_t *self,
+                                            FILE *out,
+                                            size_t longest,
+                                            const ae_opt_option_t *option)
+{
+     char field1[512];
+     ae_opt_format_option_field1(option, sizeof(field1), field1);
+     
+     fprintf(out, "  --%-*s - %s\n",
+             longest,
+             field1,
+             option->help);
+}
+
+
 static void ae_opt_help_print_option(const ae_opt_t *self,
                                      FILE *out,
                                      size_t longest,
@@ -399,6 +447,9 @@ static void ae_opt_help_print_option(const ae_opt_t *self,
      case AE_OPT_TYPE_STRING:
           ae_opt_help_print_option_string(self, out, longest, option);
           return;
+     case AE_OPT_TYPE_COUNTER:
+          ae_opt_help_print_option_counter(self, out, longest, option);
+          return;          
           break;
      }
      fprintf(out, "  --%-*s - %s\n", longest, option->name, option->help);
@@ -410,6 +461,7 @@ void ae_opt_version_print(const ae_opt_t *self, FILE *out)
      fprintf(out, "%s %s\n", self->program_name, self->version);
 }
 
+
 static void ae_opt_help_print_group(const ae_opt_option_t *option, FILE *out)
 {
      size_t name_len = strlen(option->name);
@@ -420,7 +472,8 @@ static void ae_opt_help_print_group(const ae_opt_option_t *option, FILE *out)
           fprintf(out, "%s\n", option->help);
      }
 }
-     
+
+
 void ae_opt_help_print(const ae_opt_t *self, FILE *out)
 {
      fprintf(out, "Usage %s: %s\n", self->program_name, self->help);
@@ -502,13 +555,18 @@ bool ae_opt_process(ae_res_t *e, ae_opt_t *self, int argc, char **argv)
                }
                
                const char *stripped = &arg[2];
-               /* AE_LD("comparing %s to %s", stripped, option->name); */
-               if(strcmp(stripped, option->name) != 0)
+               char *pos = strchr(stripped, '=');
+               size_t limit = pos ? (pos - stripped) : strlen(stripped);
+
+               if(strncmp(stripped, option->name, limit) != 0)
                {
                     continue;
                }
+
+               const char *param = pos ?
+                    (pos+1) : ae_opt_arg_get(self, argc, argv);
                
-               AE_TRY(ae_opt_option_process(e, self, argc, argv, option));
+               AE_TRY(ae_opt_option_process(e, self, param, option));
                processed = true;
           }
           if(!processed

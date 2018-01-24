@@ -1,8 +1,14 @@
+/**
+ * @author Greg Rowe <greg.rowe@ascending-edge.com>
+ * 
+ * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
+ */
 #include <ae/buf.h>
 #include <string.h>
 
 #include <ae/buf.h>
 #include <ae/try.h>
+
 
 ae_buf_t* ae_buf_init_from_self(ae_buf_t *self, size_t len)
 {

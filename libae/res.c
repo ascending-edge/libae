@@ -6,13 +6,19 @@
 #include <stdlib.h>
 
 
-
+/** 
+ * Initializes an ae_res_msg_t
+ */
 static void ae_res_msg_init(ae_res_msg_t *self)
 {
      self->count = 0;
      self->head = self->msg;
 }
 
+
+/** 
+ * Adds to a result message using a va_list
+ */
 static void ae_res_msg_addv(ae_res_msg_t *self, const char *fmt, va_list args)
 {
      size_t remain = sizeof(self->msg) - (self->head - self->msg);
@@ -39,6 +45,7 @@ void ae_res_clear(ae_res_t *self)
           ae_res_msg_init(&self->msg[i]);
      }
 }
+
 
 void ae_res_init(ae_res_t *self)
 {
