@@ -16,11 +16,11 @@
 typedef struct ae_pool
 {
      size_t len;                /**< total size of memory chunk */
-     uint8_t *base;             /**< base memory address */
-
-     size_t bytes_allocated;    /**< number of bytes allocated */
-     uint8_t *next;             /**< where to get next pointer from */
+     uint8_t *start;             /**< base memory address */
+     uint8_t *end;             /**< where to get next pointer from */
+     uint8_t *next;
 } ae_pool_t;
+
 
 
 
@@ -41,7 +41,7 @@ extern "C" {
 
 
      /** 
-      * This allocates a block of memory from the pool.
+
       *
       * @param out where to store the pointer
       * 

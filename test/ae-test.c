@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <ae/ae.h>
-
+#include <syslog.h>
 #include <stdlib.h>
 
 
@@ -47,35 +47,45 @@ static bool ae_test_main(ae_res_t *e)
 {
      ae_pool_t pool;
      AE_TRY(ae_pool_init(e, &pool));
+     char *foo = NULL;
 
-     ae_ptrarray_t ar;
-     AE_TRY(ae_ptrarray_init(e, &ar, &pool, 5));
-     char *hmm[] = {
-          "one",
-          "two",
-          "three",
-          "four",
-          "five",
-          "six",
-          "seven",
-          "eight",
-          "nine",
-     };
-     for(size_t i=0; i<sizeof(hmm)/sizeof(hmm[0]); ++i)
-     {
-          AE_TRY(ae_ptrarray_append(e, &ar, hmm[i]));
-     }
-     for(size_t i=0; i<ar.len; ++i)
-     {
-          char *foo = ae_ptrarray_at(&ar, i);
-          AE_LD("foo[%zu]=\"%s\"", i, foo);
-     }
+     AE_TRY(ae_pool_alloc(e, &pool, &foo, 4097));
+     AE_LD("foo=%p", foo);
+     ae_pool_uninit(e, &pool);
+     AE_LR(e);
 
-     AE_TRY(ae_test_event(e));
      
-     AE_TRY(ae_pool_uninit(e, &pool));
-     AE_TRY(cool(e));
-     return true;
+     /* ae_pool_t pool; */
+     /* AE_TRY(ae_pool_init(e, &pool)); */
+
+     /* ae_ptrarray_t ar; */
+     /* AE_TRY(ae_ptrarray_init(e, &ar, &pool, 5)); */
+     /* char *hmm[] = { */
+     /*      "one", */
+     /*      "two", */
+     /*      "three", */
+     /*      "four", */
+     /*      "five", */
+     /*      "six", */
+     /*      "seven", */
+     /*      "eight", */
+     /*      "nine", */
+     /* }; */
+     /* for(size_t i=0; i<sizeof(hmm)/sizeof(hmm[0]); ++i) */
+     /* { */
+     /*      AE_TRY(ae_ptrarray_append(e, &ar, hmm[i])); */
+     /* } */
+     /* for(size_t i=0; i<ar.len; ++i) */
+     /* { */
+     /*      char *foo = ae_ptrarray_at(&ar, i); */
+     /*      AE_LD("foo[%zu]=\"%s\"", i, foo); */
+     /* } */
+
+     /* AE_TRY(ae_test_event(e)); */
+     
+     /* AE_TRY(ae_pool_uninit(e, &pool)); */
+     /* AE_TRY(cool(e)); */
+     /* return true; */
 }
 
 void log_out(void *ctx, ae_log_level_t lvl, const char *msg)
@@ -166,6 +176,7 @@ static bool argument_callback(ae_res_t *e,
 
 int main(int argc, char *argv[])
 {
+             
      ae_res_t e;
      ae_res_init(&e);
      if(!ae_global_init(&e, log_out, NULL))
@@ -174,16 +185,19 @@ int main(int argc, char *argv[])
           fprintf(stderr, "global init error\n");
           return 1;
      }
+     openlog("ae-test", LOG_PERROR, LOG_USER);
+     g_ae_logger->mask = 0xff;
+
 
      /* if(!ae_test_opt(&e, argc -1, argv+1)) */
      /* { */
      /*      AE_LR(&e); */
      /* } */
      
-     /* if(!ae_test_main(&e)) */
-     /* { */
-     /*      AE_LR(&e); */
-     /* } */
+     if(!ae_test_main(&e))
+     {
+          AE_LR(&e);
+     }
 
      if(!ae_global_uninit(&e))
      {
