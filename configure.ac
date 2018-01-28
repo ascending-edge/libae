@@ -15,7 +15,7 @@ AC_DEFINE([LIBAE_MAJOR], libae_version_major, [Major Version])
 AC_DEFINE([LIBAE_MINOR], libae_version_minor, [Minor Version])
 AC_DEFINE([LIBAE_AGE], libae_version_age, [Age])
 
-
+AC_USE_SYSTEM_EXTENSIONS
 AM_PROG_AR
 LT_INIT
 AC_CONFIG_MACRO_DIRS([m4])

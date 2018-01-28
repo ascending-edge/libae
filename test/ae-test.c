@@ -46,11 +46,19 @@ static bool ae_test_event(ae_res_t *e)
 static bool ae_test_main(ae_res_t *e)
 {
      ae_pool_t pool;
-     AE_TRY(ae_pool_init(e, &pool));
+     AE_TRY(ae_pool_init(e, &pool, 8192 * 2));
      char *foo = NULL;
 
-     AE_TRY(ae_pool_alloc(e, &pool, &foo, 4097));
+     AE_TRY(ae_pool_alloc(e, &pool, &foo, 4096));
      AE_LD("foo=%p", foo);
+     strcpy(foo, "foo");
+     char *dest = NULL;
+     AE_TRY(ae_pool_alloc(e, &pool, &dest, 8192));
+     AE_LD("dest=%p", dest);
+
+     char *dup = NULL;
+     AE_TRY(ae_pool_strdup(e, &pool, foo, -1, &dup));
+     AE_LD("dup=%s", dup);
      ae_pool_uninit(e, &pool);
      AE_LR(e);
 

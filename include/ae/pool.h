@@ -37,7 +37,7 @@ extern "C" {
      /** 
       * This prepares the memory pool for use.
       */
-     bool ae_pool_init(ae_res_t *e, ae_pool_t *self);
+     bool ae_pool_init(ae_res_t *e, ae_pool_t *self, size_t initial_size);
 
 
      /** 
@@ -59,23 +59,32 @@ extern "C" {
       * argument.  That would require a bit more book-keeping.
       *
       * @param src source memory block
-      * @param src_len how many bytes are in @p src
-      * @param dest destination memory block (really a void**)
-      * @param dest_len how many bytes should be allocated
+      * 
+      * @param src_len source length
+      * 
+      * @param new destination memory block (really a void**)
+      * 
+      * @param new_len how many bytes should be allocated
       */
      bool ae_pool_realloc(ae_res_t *e, ae_pool_t *self,
                           void *src, size_t src_len,
-                          void *dest, size_t dest_len);
+                          void *new, size_t new_len);
 
 
      /** 
       * Duplicates a string allocating memory from the pool to do so.
       *
       * @param src source string
+      * 
+      * @param src_len use -1 to have this compute the length.  If you
+      * already know the length use it here to save an internal call
+      * to strlen.
+      * 
       * @param out output string
       */
      bool ae_pool_strdup(ae_res_t *e, ae_pool_t *self,
-                         const char *src, char **out);
+                         const char *src, ssize_t src_len,
+                         char **out);
 
 
 #ifdef __cplusplus

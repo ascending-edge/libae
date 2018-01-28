@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <sys/types.h>          /* ssize_t */
 
 #ifdef __cplusplus
 extern "C" {
