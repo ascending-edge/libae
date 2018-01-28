@@ -90,7 +90,7 @@ bool ae_pool_alloc(ae_res_t *e, ae_pool_t *self, void *_out, size_t len)
      /* DO NOT FORGET ABOUT ALIGNMENT! */
      /* Let's make the potentially false assumption that we'll only be
       * on 32 or 64 bit architectures */
-#ifdef _LP64 == 64
+#ifdef _LP64
      int align = 16;
 #else
      int align = 8;
