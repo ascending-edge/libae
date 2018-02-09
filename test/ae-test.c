@@ -122,65 +122,65 @@ static bool argument_callback(ae_res_t *e,
 }
 
 
-/* static bool ae_test_opt(ae_res_t *e, int argc, char **argv) */
-/* { */
-/*      bool nifty = false; */
-/*      int foo = 42; */
-/*      int int_args[] = {-1, 1, 10}; */
-/*      int int_result = 100; */
-/*      ae_opt_option_t options[] = { */
-/*           { */
-/*                .name = "argument1", */
-/*                .help = "argument 1 help text", */
-/*                .is_required = AE_OPT_PARAM_REQUIRED, */
-/*                .callback = opt_callback, */
-/*           }, */
-/*           { */
-/*                .name = "Group Name", */
-/*                .help = "group help text", */
-/*                .required = AE_OPT_GROUP, */
-/*           }, */
-/*           { */
-/*                .name = "short", */
-/*                .help = "argument 1 help text", */
-/*                .required = AE_OPT_REQUIRED, */
-/*                .callback = opt_callback, */
-/*                .ctx = &foo, */
-/*           }, */
-/*           { */
-/*                .name = "test", */
-/*                .help = "nifty", */
-/*                .required = AE_OPT_BOOL, */
-/*                .callback = opt_callback, */
-/*                .ctx = &foo, */
-/*                .out = &nifty, */
-/*           }, */
-/*           { */
-/*                .name = "int", */
-/*                .help = "sweet", */
-/*                .required = AE_OPT_INT, */
-/*                .callback = opt_callback, */
-/*                .ctx = &foo, */
-/*                .in = &int_args, */
-/*                .out = &int_result, */
-/*           }, */
-/*      }; */
-/*      ae_opt_t opt; */
-/*      AE_TRY(ae_opt_init(e, &opt, "ae-test", "help line", */
-/*                         argument_callback, */
-/*                         NULL, */
-/*                         AE_ARRAY_LEN(options), options)); */
-/*      AE_TRY(ae_opt_process(e, &opt, argc, argv)); */
-/*      AE_LD("bool=%d", nifty); */
+static bool ae_test_opt(ae_res_t *e, int argc, char **argv)
+{
+     bool nifty = false;
+     int foo = 42;
+     int int_args[] = {-1, 1, 10};
+     int int_result = 100;
+     ae_opt_option_t options[] = {
+          {
+               .name = "argument1",
+               .help = "argument 1 help text",
+               .is_required = AE_OPT_PARAM_REQUIRED,
+               .callback = opt_callback,
+          },
+          {
+               .name = "Group Name",
+               .help = "group help text",
+               .is_required = AE_OPT_TYPE_GROUP,
+          },
+          {
+               .name = "short",
+               .help = "argument 1 help text",
+               .is_required = AE_OPT_PARAM_REQUIRED,
+               .callback = opt_callback,
+               .ctx = &foo,
+          },
+          {
+               .name = "test",
+               .help = "nifty",
+               .is_required = AE_OPT_TYPE_FLAG,
+               .callback = opt_callback,
+               .ctx = &foo,
+               .out = &nifty,
+          },
+          {
+               .name = "int",
+               .help = "sweet",
+               .is_required = AE_OPT_TYPE_INT,
+               .callback = opt_callback,
+               .ctx = &foo,
+               .in = &int_args,
+               .out = &int_result,
+          },
+     };
+     ae_opt_t opt;
+     AE_TRY(ae_opt_init(e, &opt, "ae-test", "1.0", "help line",
+                        argument_callback,
+                        NULL,
+                        AE_ARRAY_LEN(options), options));
+     AE_TRY(ae_opt_process(e, &opt, argc, argv));
+     AE_LD("bool=%d", nifty);
 
-/*      AE_LD("remaining unprocessed args: optind=%d", opt.optind); */
-/*      for(size_t i=opt.optind; i<argc; ++i) */
-/*      { */
-/*           AE_LD("[%zu]='%s'", i, argv[i]); */
-/*      } */
-/*      ae_opt_help_print(&opt, stdout); */
-/*      exit(1); */
-/* } */
+     AE_LD("remaining unprocessed args: optind=%d", opt.optind);
+     for(size_t i=opt.optind; i<argc; ++i)
+     {
+          AE_LD("[%zu]='%s'", i, argv[i]);
+     }
+     ae_opt_help_print(&opt, stdout);
+     exit(1);
+}
 
 int main(int argc, char *argv[])
 {
@@ -197,10 +197,10 @@ int main(int argc, char *argv[])
      g_ae_logger->mask = 0xff;
 
 
-     /* if(!ae_test_opt(&e, argc -1, argv+1)) */
-     /* { */
-     /*      AE_LR(&e); */
-     /* } */
+     if(!ae_test_opt(&e, argc -1, argv+1))
+     {
+          AE_LR(&e);
+     }
      
      if(!ae_test_main(&e))
      {
