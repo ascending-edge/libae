@@ -116,6 +116,7 @@ typedef bool (*ae_opt_callback_t)(ae_res_t *e,
 typedef struct ae_opt_option
 {
      const char *name;          /**< command line argument name */
+     size_t name_len;           /**< callers should ignore this field */
      const char *help;          /**< short help text */
      const char *help_param;    /**< very short help text for a parameter */
      ae_opt_type_t type;        /**< how to process this table entry */
@@ -184,7 +185,7 @@ extern "C" {
                       const char *version,
                       const char *help,
                       ae_opt_callback_t cb, void *ctx,
-                      size_t options_len, const ae_opt_option_t *options);
+                      size_t options_len, ae_opt_option_t *options);
 
      /** 
       * Process arguments

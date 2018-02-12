@@ -130,39 +130,24 @@ static bool ae_test_opt(ae_res_t *e, int argc, char **argv)
      int int_result = 100;
      ae_opt_option_t options[] = {
           {
-               .name = "argument1",
-               .help = "argument 1 help text",
-               .is_required = AE_OPT_PARAM_REQUIRED,
-               .callback = opt_callback,
+               .name = "help",
+               .help = "print help",
+               .type = AE_OPT_TYPE_HELP,
           },
           {
-               .name = "Group Name",
-               .help = "group help text",
-               .is_required = AE_OPT_TYPE_GROUP,
+               .name = "version",
+               .help = "print version",
+               .type = AE_OPT_TYPE_VERSION,
           },
           {
-               .name = "short",
-               .help = "argument 1 help text",
-               .is_required = AE_OPT_PARAM_REQUIRED,
-               .callback = opt_callback,
-               .ctx = &foo,
+               .name = "Group",
+               .help = "a section",
+               .type = AE_OPT_TYPE_GROUP,
           },
           {
                .name = "test",
-               .help = "nifty",
-               .is_required = AE_OPT_TYPE_FLAG,
-               .callback = opt_callback,
-               .ctx = &foo,
-               .out = &nifty,
-          },
-          {
-               .name = "int",
-               .help = "sweet",
-               .is_required = AE_OPT_TYPE_INT,
-               .callback = opt_callback,
-               .ctx = &foo,
-               .in = &int_args,
-               .out = &int_result,
+               .help = "testing",
+               .type = AE_OPT_TYPE_INT,
           },
      };
      ae_opt_t opt;

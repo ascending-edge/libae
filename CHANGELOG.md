@@ -6,6 +6,10 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [UNRELEASED]
+### Fixed
+- bug where substrings were being matched in option processing
+
 ## [0.0.2] - 2018-02-09
 ### Fixed
 - fixed 64 bit macro test

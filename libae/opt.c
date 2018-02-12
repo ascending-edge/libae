@@ -18,7 +18,7 @@ bool ae_opt_init(ae_res_t *e, ae_opt_t *self,
                  const char *version,
                  const char *help,
                  ae_opt_callback_t cb, void *ctx,
-                 size_t options_len, const ae_opt_option_t *options)
+                 size_t options_len, ae_opt_option_t *options)
 {
      self->program_name = name;
      self->version = version;
@@ -27,6 +27,15 @@ bool ae_opt_init(ae_res_t *e, ae_opt_t *self,
      self->ctx = ctx;
      self->options_len = options_len;
      self->options = options;
+
+     for(size_t i=0; i<options_len; ++i)
+     {
+          ae_opt_option_t *option = &options[i];
+          if(option->name)
+          {
+               option->name_len = strlen(option->name);
+          }
+     }
      return true;
 }
 
@@ -315,7 +324,7 @@ static size_t ae_opt_option_field1_width(const ae_opt_option_t *option)
           return ae_opt_field1_width(option);
           break;
      default:
-          return strlen(option->name);
+          return option->name_len;
      }
      return 0;
 }
@@ -325,6 +334,7 @@ static size_t ae_opt_group_get_longest(const ae_opt_t *self, size_t ix)
 {
      /* find the longest name until a new group or the end */
      size_t longest = 0;
+     /* printf("ix=%zu len=%zu\n", ix, self->options_len); */
      for(size_t i=ix; i<self->options_len; ++i)
      {
           const ae_opt_option_t *option = &self->options[i];
@@ -343,6 +353,7 @@ static size_t ae_opt_group_get_longest(const ae_opt_t *self, size_t ix)
                longest = arg_len;
           }          
      }
+     /* printf("longest: %zu", longest); */
      return longest;
 }
 
@@ -558,11 +569,15 @@ bool ae_opt_process(ae_res_t *e, ae_opt_t *self, int argc, char **argv)
                char *pos = strchr(stripped, '=');
                size_t limit = pos ? (pos - stripped) : strlen(stripped);
 
-               if(strncmp(stripped, option->name, limit) != 0)
+               if(limit != option->name_len)
                {
                     continue;
                }
 
+               if(strncmp(option->name, stripped, limit) != 0)
+               {
+                    continue;
+               }
                const char *param = pos ?
                     (pos+1) : ae_opt_arg_get(self, argc, argv);
                
