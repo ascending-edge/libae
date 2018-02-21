@@ -117,6 +117,15 @@ bool ae_pool_alloc(ae_res_t *e, ae_pool_t *self, void *_out, size_t len)
 }
 
 
+bool ae_pool_calloc(ae_res_t *e, ae_pool_t *self, void *_out, size_t len)
+{
+     void **out = _out;
+     AE_TRY(ae_pool_alloc(e, self, out, len));
+     memset(*out, 0, len);
+     return true;
+}
+
+
 bool ae_pool_realloc(ae_res_t *e, ae_pool_t *self,
                      void *src, size_t src_len,
                      void *_new, size_t new_len)
@@ -146,11 +155,11 @@ bool ae_pool_strdup(ae_res_t *e, ae_pool_t *self,
 {
      size_t len = (src_len == -1) ? strlen(src) : src_len;
      ++len;
-     printf("src=%s len=%zu\n", src, len);
+     /* printf("src=%s len=%zu\n", src, len); */
      AE_TRY(ae_pool_alloc(e, self, out, len));
-     printf("out=%p\n", *out);
+     /* printf("out=%p\n", *out); */
      strncpy(*out, src, len);
-     printf("out=%s\n", *out);
+     /* printf("out=%s\n", *out); */
      return true;
 }
 

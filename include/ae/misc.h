@@ -11,6 +11,8 @@
  */
 #define AE_ARRAY_LEN(ar) sizeof((ar)) / sizeof((ar)[0])
 
+#define AE_MEM_CLEAR(ptr) memset((ptr), 0, sizeof(*(ptr)));
+
 #ifdef __cplusplus
 extern "C" {
 #endif

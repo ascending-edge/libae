@@ -18,6 +18,7 @@
 #include <ae/ptrarray.h>
 #include <ae/res.h>
 #include <ae/str.h>
+#include <ae/time.h>
 #include <ae/try.h>
 #include <ae/types.h>
 

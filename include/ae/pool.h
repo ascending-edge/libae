@@ -48,6 +48,7 @@ extern "C" {
       * @param len how many bytes to allocate
       */
      bool ae_pool_alloc(ae_res_t *e, ae_pool_t *self, void *out, size_t len);
+     bool ae_pool_calloc(ae_res_t *e, ae_pool_t *self, void *out, size_t len);
 
 
      /** 

@@ -45,7 +45,8 @@ typedef enum ae_opt_type
      AE_OPT_TYPE_STRING,        /**< The argument is a string */
      AE_OPT_TYPE_BIT,           /**< The argument is stored in a bit flag */
      AE_OPT_TYPE_COUNTER,       /**< The argument controls a counter */
-     
+     AE_OPT_TYPE_CALLBACK_ONLY, /**< The caller wants ONLY to receive
+                                 * a callback */
      AE_OPT_ENDMARKER,
 } ae_opt_type_t;
 
