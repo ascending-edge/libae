@@ -127,6 +127,11 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
 
 	if(self->count == 0)
 	{
+          if(timeout_ms)
+          {
+               usleep(timeout_ms * 1000);
+               *out_was_timeout = true;
+          }
 		return true;
 	}
 

@@ -18,7 +18,8 @@ libae0_la_SOURCES = \
 	ptrarray.c \
 	res.c \
 	str.c \
-	time.c 
+	time.c \
+	timer.c
 headerdir = $(prefix)/include/ae
 header_DATA = \
 	../include/ae/ae.h \
@@ -31,7 +32,8 @@ header_DATA = \
 	../include/ae/ptrarray.h \
 	../include/ae/res.h \
 	../include/ae/str.h \
-	../include/ae/time.h
+	../include/ae/time.h \
+	../include/ae/timer.h \
 	../include/ae/try.h \
 	../include/ae/types.h 
 
