@@ -7,7 +7,10 @@ project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [UNRELEASED]
+## [0.1.0] 21018-02-28
+I should probably make this 1.0.0 since I changed ae_event to ae_mux
+but I'm just going to bump the minor since I'd rather wait longer to
+do a 1.0.0 release.
 ### Added
 - ae_time_* functions
 - AE_MEM_CLEAR macro for zeroing out a block of RAM
