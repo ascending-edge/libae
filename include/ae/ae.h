@@ -9,8 +9,7 @@
 #ifndef _AE_H
 #define _AE_H
 
-#include <ae/buf.h>
-#include <ae/event.h>
+#include <ae/mux.h>
 #include <ae/log.h>
 #include <ae/misc.h>
 #include <ae/opt.h>

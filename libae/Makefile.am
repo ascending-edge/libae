@@ -10,23 +10,23 @@ libae0_la_CPPFLAGS = \
 
 libae0_la_SOURCES = \
 	ae.c \
-	buf.c \
-	event.c \
 	log.c \
+	mux.c \
 	opt.c \
 	pool.c \
 	ptrarray.c \
 	res.c \
 	str.c \
 	time.c \
-	timer.c
+	timer.c 
+
+
 headerdir = $(prefix)/include/ae
 header_DATA = \
 	../include/ae/ae.h \
-	../include/ae/buf.h \
-	../include/ae/event.h \
 	../include/ae/log.h \
 	../include/ae/misc.h \
+	../include/ae/mux.h \
 	../include/ae/opt.h \
 	../include/ae/pool.h \
 	../include/ae/ptrarray.h \
@@ -36,4 +36,3 @@ header_DATA = \
 	../include/ae/timer.h \
 	../include/ae/try.h \
 	../include/ae/types.h 
-

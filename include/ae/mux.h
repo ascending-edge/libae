@@ -3,8 +3,8 @@
  * 
  * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
  */
-#ifndef _AE_EVENT_H
-#define _AE_EVENT_H
+#ifndef _AE_MUX_H
+#define _AE_MUX_H
 
 #include <ae/res.h>
 #include <sys/epoll.h>
@@ -14,12 +14,12 @@
  * This class makes it easy to use epoll (or some other multiplexing
  * mechanism).
  */
-typedef struct ae_event
+typedef struct ae_mux
 {
      size_t count;              /**< The number of file descriptors
                                  * registered */
      int epoll_fd;              /**< The epoll file descriptor */
-} ae_event_t;
+} ae_mux_t;
 
 
 /** 
@@ -29,23 +29,23 @@ typedef struct ae_event
  * @param event the fd/event that was triggered  (see epoll.h)
  * @param ctx the context pointer that was registered with the fd/event
  */
-typedef void (*ae_event_cb_t)(ae_event_t *self,
-                              const struct epoll_event *event,
-                              void *ctx);
+typedef void (*ae_mux_cb_t)(ae_mux_t *self,
+                            const struct epoll_event *event,
+                            void *ctx);
 
 
 /**
  * This is used for registering a fd/event.  Any field can be NULL.
  */
-typedef struct ae_event_data
+typedef struct ae_mux_event
 {
-     void *ctx;                 /**< arbitrary context */
-     ae_event_cb_t read;        /**< read event callback */
-     ae_event_cb_t write;       /**< write event callback */
-     ae_event_cb_t hangup;      /**< hangup event callback */
-     ae_event_cb_t priority;    /**< priority data event callback */
-     ae_event_cb_t error;       /**< error event callback */
-} ae_event_data_t;
+     void *ctx;               /**< arbitrary context */
+     ae_mux_cb_t read;        /**< read event callback */
+     ae_mux_cb_t write;       /**< write event callback */
+     ae_mux_cb_t hangup;      /**< hangup event callback */
+     ae_mux_cb_t priority;    /**< priority data event callback */
+     ae_mux_cb_t error;       /**< error event callback */
+} ae_mux_event_t;
 
 
 
@@ -57,14 +57,14 @@ extern "C" {
       * Cleans up the event wrapper.  This must be called for proper
       * cleanup.
       */
-     bool ae_event_uninit(ae_res_t *e, ae_event_t *self);
+     bool ae_mux_uninit(ae_res_t *e, ae_mux_t *self);
 
 
      /** 
       * This prepares an event wrapper for use.  This must be called
       * prior to any other call.
       */
-     bool ae_event_init(ae_res_t *e, ae_event_t *self);
+     bool ae_mux_init(ae_res_t *e, ae_mux_t *self);
 
 
      /** 
@@ -74,17 +74,10 @@ extern "C" {
       * 
       * @param d the callbacks.  These must exist, this is not copied.
       */
-     bool ae_event_add(ae_res_t *e, ae_event_t *self,
-                       int fd,
-                       const ae_event_data_t *d);
+     bool ae_mux_add(ae_res_t *e, ae_mux_t *self,
+                     int fd, const ae_mux_event_t *d);
+     bool ae_mux_rm(ae_res_t *e, ae_mux_t *self, int fd);
 
-
-     /** 
-      * Returns the number of currently registered file descriptors.
-      * 
-      * @return the number of registered file descriptors.
-      */
-     int ae_event_get_n_registered(ae_event_t *self);
 
 
      /** 
@@ -105,11 +98,11 @@ extern "C" {
       * @param out_was_timeout if timeout_ms expires and this is not
       * NULL then the boolean pointed to will be set to true.
       */
-     bool ae_event_wait(ae_res_t *e, ae_event_t *self,
-                        struct epoll_event *events,
-                        size_t n_events,
-                        int timeout_ms,
-                        bool *out_was_timeout);
+     bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
+                      struct epoll_event *events,
+                      size_t n_events,
+                      int timeout_ms,
+                      bool *out_was_timeout);
 
 #ifdef __cplusplus
 }

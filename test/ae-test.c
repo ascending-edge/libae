@@ -2,98 +2,56 @@
 #include <ae/ae.h>
 #include <syslog.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
-
-static bool cool(ae_res_t *e)
+static void ae_test_read(ae_mux_t *self,
+                         const struct epoll_event *event,
+                         void *ctx)
 {
-     ae_res_err(e, "hello from cool %u", LIBAE_MAJOR);
-     return false;
-}
-
-
-static void ae_test_event_read(ae_event_t *ae_event,
-                               const struct epoll_event *event,
-                               void *ctx)
-{
-     uint32_t *val = ctx;
-     fprintf(stderr, "context %u!!!\n", *val);
-}
-
-static bool ae_test_event(ae_res_t *e)
-{
-     fprintf(stderr, "test event\n");
-     uint32_t foo = 68;
-     ae_event_t event;
-     ae_event_data_t data;
-     data.read = ae_test_event_read;
-     data.ctx = &foo;
-     AE_TRY(ae_event_init(e, &event));
-
-     AE_TRY(ae_event_add(e, &event, fileno(stdin), &data));
-
-     struct epoll_event events[1];
-     bool was_timeout = false;
-     AE_TRY(ae_event_wait(e, &event,
-                          events,
-                          sizeof(events)/sizeof(events[0]),
-                          2000,
-                          &was_timeout));
-     fprintf(stderr, "was timeout: %s\n", was_timeout ? "true":"false");
-     return true;
+     uint64_t overflows = 0;
+     ae_res_t e;
+     ae_res_init(&e);
+     if(!ae_timer_read(&e, ctx, &overflows))
+     {
+          AE_LR(&e);
+          return;
+     }
+     
+     AE_LD("sup: %"PRIu64"", overflows);
 }
 
 
 static bool ae_test_main(ae_res_t *e)
 {
-     ae_pool_t pool;
-     AE_TRY(ae_pool_init(e, &pool, 8192 * 2));
-     char *foo = NULL;
+     ae_mux_t mux;
+     memset(&mux, 0, sizeof(mux));
+     AE_TRY(ae_mux_init(e, &mux));
 
-     AE_TRY(ae_pool_alloc(e, &pool, &foo, 4096));
-     AE_LD("foo=%p", foo);
-     strcpy(foo, "foo");
-     char *dest = NULL;
-     AE_TRY(ae_pool_alloc(e, &pool, &dest, 8192));
-     AE_LD("dest=%p", dest);
+     ae_timer_t t;
+     memset(&t, 0, sizeof(t));
+     AE_TRY(ae_timer_init(e, &t, CLOCK_MONOTONIC));
+     struct timespec ts = {.tv_sec = 1, .tv_nsec = 500000000};
+     AE_TRY(ae_timer_every(e, &t, &ts));
 
-     char *dup = NULL;
-     AE_TRY(ae_pool_strdup(e, &pool, foo, -1, &dup));
-     AE_LD("dup=%s", dup);
-     ae_pool_uninit(e, &pool);
-     AE_LR(e);
+     ae_mux_event_t me;
+     memset(&me, 0, sizeof(me));
+     me.ctx = &t;
+     me.read = ae_test_read;
 
+     AE_TRY(ae_mux_add(e, &mux, t.fd, &me));
+
+     struct epoll_event events[1];
+     for(;;)
+     {
+          bool was_to = false;
+          AE_TRY(ae_mux_wait(e, &mux,
+                             events, AE_ARRAY_LEN(events),
+                             1500, &was_to));
+          AE_LD("mux wait exit was_to=%s", was_to ? "true":"false");
+     }
      
-     /* ae_pool_t pool; */
-     /* AE_TRY(ae_pool_init(e, &pool)); */
-
-     /* ae_ptrarray_t ar; */
-     /* AE_TRY(ae_ptrarray_init(e, &ar, &pool, 5)); */
-     /* char *hmm[] = { */
-     /*      "one", */
-     /*      "two", */
-     /*      "three", */
-     /*      "four", */
-     /*      "five", */
-     /*      "six", */
-     /*      "seven", */
-     /*      "eight", */
-     /*      "nine", */
-     /* }; */
-     /* for(size_t i=0; i<sizeof(hmm)/sizeof(hmm[0]); ++i) */
-     /* { */
-     /*      AE_TRY(ae_ptrarray_append(e, &ar, hmm[i])); */
-     /* } */
-     /* for(size_t i=0; i<ar.len; ++i) */
-     /* { */
-     /*      char *foo = ae_ptrarray_at(&ar, i); */
-     /*      AE_LD("foo[%zu]=\"%s\"", i, foo); */
-     /* } */
-
-     /* AE_TRY(ae_test_event(e)); */
-     
-     /* AE_TRY(ae_pool_uninit(e, &pool)); */
-     /* AE_TRY(cool(e)); */
-     /* return true; */
+     ae_mux_uninit(e, &mux);
+     return true;
 }
 
 void log_out(void *ctx, ae_log_level_t lvl, const char *msg)
@@ -122,50 +80,50 @@ static bool argument_callback(ae_res_t *e,
 }
 
 
-static bool ae_test_opt(ae_res_t *e, int argc, char **argv)
-{
-     bool nifty = false;
-     int foo = 42;
-     int int_args[] = {-1, 1, 10};
-     int int_result = 100;
-     ae_opt_option_t options[] = {
-          {
-               .name = "help",
-               .help = "print help",
-               .type = AE_OPT_TYPE_HELP,
-          },
-          {
-               .name = "version",
-               .help = "print version",
-               .type = AE_OPT_TYPE_VERSION,
-          },
-          {
-               .name = "Group",
-               .help = "a section",
-               .type = AE_OPT_TYPE_GROUP,
-          },
-          {
-               .name = "test",
-               .help = "testing",
-               .type = AE_OPT_TYPE_INT,
-          },
-     };
-     ae_opt_t opt;
-     AE_TRY(ae_opt_init(e, &opt, "ae-test", "1.0", "help line",
-                        argument_callback,
-                        NULL,
-                        AE_ARRAY_LEN(options), options));
-     AE_TRY(ae_opt_process(e, &opt, argc, argv));
-     AE_LD("bool=%d", nifty);
+/* static bool ae_test_opt(ae_res_t *e, int argc, char **argv) */
+/* { */
+/*      bool nifty = false; */
+/*      int foo = 42; */
+/*      int int_args[] = {-1, 1, 10}; */
+/*      int int_result = 100; */
+/*      ae_opt_option_t options[] = { */
+/*           { */
+/*                .name = "help", */
+/*                .help = "print help", */
+/*                .type = AE_OPT_TYPE_HELP, */
+/*           }, */
+/*           { */
+/*                .name = "version", */
+/*                .help = "print version", */
+/*                .type = AE_OPT_TYPE_VERSION, */
+/*           }, */
+/*           { */
+/*                .name = "Group", */
+/*                .help = "a section", */
+/*                .type = AE_OPT_TYPE_GROUP, */
+/*           }, */
+/*           { */
+/*                .name = "test", */
+/*                .help = "testing", */
+/*                .type = AE_OPT_TYPE_INT, */
+/*           }, */
+/*      }; */
+/*      ae_opt_t opt; */
+/*      AE_TRY(ae_opt_init(e, &opt, "ae-test", "1.0", "help line", */
+/*                         argument_callback, */
+/*                         NULL, */
+/*                         AE_ARRAY_LEN(options), options)); */
+/*      AE_TRY(ae_opt_process(e, &opt, argc, argv)); */
+/*      AE_LD("bool=%d", nifty); */
 
-     AE_LD("remaining unprocessed args: optind=%d", opt.optind);
-     for(size_t i=opt.optind; i<argc; ++i)
-     {
-          AE_LD("[%zu]='%s'", i, argv[i]);
-     }
-     ae_opt_help_print(&opt, stdout);
-     exit(1);
-}
+/*      AE_LD("remaining unprocessed args: optind=%d", opt.optind); */
+/*      for(size_t i=opt.optind; i<argc; ++i) */
+/*      { */
+/*           AE_LD("[%zu]='%s'", i, argv[i]); */
+/*      } */
+/*      ae_opt_help_print(&opt, stdout); */
+/*      exit(1); */
+/* } */
 
 int main(int argc, char *argv[])
 {
@@ -181,11 +139,6 @@ int main(int argc, char *argv[])
      openlog("ae-test", LOG_PERROR, LOG_USER);
      g_ae_logger->mask = 0xff;
 
-
-     if(!ae_test_opt(&e, argc -1, argv+1))
-     {
-          AE_LR(&e);
-     }
      
      if(!ae_test_main(&e))
      {

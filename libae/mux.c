@@ -1,15 +1,15 @@
-#include <ae/event.h>
+#include <ae/mux.h>
 
-
+#include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
-
 #include <unistd.h>
 #include <time.h>
 
 #include <ae/try.h>
 
 
-bool ae_event_uninit(ae_res_t *e, ae_event_t *self)
+bool ae_mux_uninit(ae_res_t *e, ae_mux_t *self)
 {
 	if(close(self->epoll_fd) != 0)
 	{
@@ -19,7 +19,7 @@ bool ae_event_uninit(ae_res_t *e, ae_event_t *self)
 }
 
 
-bool ae_event_init(ae_res_t *e, ae_event_t *self)
+bool ae_mux_init(ae_res_t *e, ae_mux_t *self)
 {
      self->count = 0;
 	if((self->epoll_fd = epoll_create1(0)) == -1)
@@ -47,9 +47,7 @@ bool ae_event_init(ae_res_t *e, ae_event_t *self)
 /* } */
 
 
-bool ae_event_add(ae_res_t *e, ae_event_t *self,
-                  int fd,
-                  const ae_event_data_t *d)
+bool ae_mux_add(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
 {
      uint32_t events = 0;
      if(d->read)
@@ -95,7 +93,7 @@ bool ae_event_add(ae_res_t *e, ae_event_t *self,
 }
 
 
-static bool ae_event_now_get(ae_res_t *e, uint64_t *now_ms)
+static bool ae_mux_now_get(ae_res_t *e, uint64_t *now_ms)
 {
 	struct timespec tp;
 	memset(&tp, 0, sizeof(tp));
@@ -114,11 +112,11 @@ static bool ae_event_now_get(ae_res_t *e, uint64_t *now_ms)
 }
 
 
-bool ae_event_wait(ae_res_t *e, ae_event_t *self,
-                   struct epoll_event *events,
-                   size_t n_events,
-                   int timeout_ms,
-                   bool *out_was_timeout)
+bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
+                 struct epoll_event *events,
+                 size_t n_events,
+                 int timeout_ms,
+                 bool *out_was_timeout)
 {
 	if(out_was_timeout)
 	{
@@ -136,7 +134,7 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
 	}
 
 	uint64_t then = 0;
-     AE_TRY(ae_event_now_get(e, &then));
+     AE_TRY(ae_mux_now_get(e, &then));
 	then += timeout_ms;
 
 	int res = 0;
@@ -150,7 +148,7 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
                 * timeout didn't expire either.  Adjust the timeout
                 * accordingly and re-enter the wait */
 			uint64_t now = 0;
-			AE_TRY(ae_event_now_get(e, &now));
+			AE_TRY(ae_mux_now_get(e, &now));
                if(now < then)
                {
                     timeout_ms = then - now;
@@ -186,7 +184,7 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
 	{
           struct epoll_event *event = &events[i];
           uint32_t events = event->events;
-		ae_event_data_t *info = event->data.ptr;
+		ae_mux_event_t *info = event->data.ptr;
           if((events & EPOLLIN)
              && info->read)
           {
@@ -218,11 +216,22 @@ bool ae_event_wait(ae_res_t *e, ae_event_t *self,
 }
 
 
-int ae_event_get_n_registered(ae_event_t *self)
+bool ae_mux_rm(ae_res_t *e, ae_mux_t *self, int fd)
 {
-     return self->count;
-}
+     /* Avoid error for invalid/closed file descriptors */
+     if(fcntl(fd, F_GETFD, 0) == -1)
+	{
+		return true;
+	}
 
+	if(epoll_ctl(self->epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1)
+	{
+		ae_res_err(e, "epoll del fd=%d: %s", fd, strerror(errno));
+		return false;
+	}
+
+	return true;
+}
 
 /* bool st_ep_rm(st_err_t *err, st_ep_t *self, st_ep_entry_t *entry) */
 /* { */

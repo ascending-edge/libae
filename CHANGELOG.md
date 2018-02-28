@@ -13,11 +13,14 @@ to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 - AE_MEM_CLEAR macro for zeroing out a block of RAM
 - CALLBACK_ONLY added to ae_opt option parser
 - ae_pool_calloc for convenience
+- ae_timer_t for periodic and single-shot functionality
 ### Fixed
 - bug where substrings were being matched in option processing
 - removed some debug output
 ### Changed
 - ae_opt callbacks happen before the default action now
+### Removed
+- buf_t since it only makes life more difficult
 
 
 ## [0.0.2] - 2018-02-09
