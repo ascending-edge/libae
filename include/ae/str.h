@@ -38,6 +38,13 @@
      ae_str_printf((buf),(sizeof(buf)), fmt, __VA_ARGS__)
 
 
+#define AE_STR_FROM_ARGS(str, len, fmt)           \
+     va_list args;                                \
+     va_start(args, (fmt));                       \
+     ae_str_printv((str), (len), (fmt), args);    \
+     va_end(args)
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -10,6 +10,7 @@ libae0_la_CPPFLAGS = \
 
 libae0_la_SOURCES = \
 	ae.c \
+	io.c \
 	log.c \
 	mux.c \
 	opt.c \
