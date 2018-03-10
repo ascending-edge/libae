@@ -9,9 +9,10 @@
 #ifndef _AE_H
 #define _AE_H
 
-#include <ae/mux.h>
+#include <ae/io.h>
 #include <ae/log.h>
 #include <ae/misc.h>
+#include <ae/mux.h>
 #include <ae/opt.h>
 #include <ae/pool.h>
 #include <ae/ptrarray.h>

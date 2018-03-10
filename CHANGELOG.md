@@ -6,12 +6,12 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [0.2.0] 2018-03-10
 ### Added
 - ae_io for convenient reading and writing to/from file descriptors
 - AE_STR_FROM_ARGS for populating a string from variable arguments
 
-## [0.1.0] 21018-02-28
+## [0.1.0] 2018-02-28
 I should probably make this 1.0.0 since I changed ae_event to ae_mux
 but I'm just going to bump the minor since I'd rather wait longer to
 do a 1.0.0 release.

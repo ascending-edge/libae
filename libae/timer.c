@@ -20,7 +20,8 @@ bool ae_timer_uninit(ae_res_t *e, ae_timer_t *self)
 bool ae_timer_init(ae_res_t *e, ae_timer_t *self, int clock_id)
 {
      self->fd = -1;
-     self->fd = timerfd_create(clock_id, TFD_CLOEXEC);
+     self->clock_id = clock_id;
+     self->fd = timerfd_create(self->clock_id, TFD_CLOEXEC);
      if(self->fd == -1)
      {
           ae_res_err(e, "timerfd create: %s", strerror(errno));
@@ -62,6 +63,17 @@ bool ae_timer_every(ae_res_t *e, ae_timer_t *self,
                     const struct timespec *interval)
 {
      AE_TRY(ae_timer_set(e, self, 0, interval, interval));
+     return true;
+}
+
+
+bool ae_timer_every_now(ae_res_t *e, ae_timer_t *self,
+                        const struct timespec *interval)
+{
+     struct timespec now;
+     now.tv_sec = 0;
+     now.tv_nsec = 1;
+     AE_TRY(ae_timer_set(e, self, 0, interval, &now));
      return true;
 }
 

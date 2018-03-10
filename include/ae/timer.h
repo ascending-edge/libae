@@ -6,6 +6,7 @@
 typedef struct ae_timer
 {
      int fd;
+     clockid_t clock_id;
 } ae_timer_t;
 
 #ifdef __cplusplus
@@ -19,6 +20,10 @@ extern "C" {
 
      bool ae_timer_every(ae_res_t *e, ae_timer_t *self,
                          const struct timespec *interval);
+
+     /* triggers immediately */
+     bool ae_timer_every_now(ae_res_t *e, ae_timer_t *self,
+                             const struct timespec *interval);
      
      bool ae_timer_single_shot(ae_res_t *e, ae_timer_t *self,
                                const struct timespec *from_now);
