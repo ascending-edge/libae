@@ -6,6 +6,10 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [UNRELEASED] 2018-03-12
+### Fixed
+- io.h was missing from the install target in Makefile.am
+
 ## [0.2.0] 2018-03-10
 ### Added
 - ae_io for convenient reading and writing to/from file descriptors

@@ -25,6 +25,7 @@ libae0_la_SOURCES = \
 headerdir = $(prefix)/include/ae
 header_DATA = \
 	../include/ae/ae.h \
+	../include/ae/io.h \
 	../include/ae/log.h \
 	../include/ae/misc.h \
 	../include/ae/mux.h \
