@@ -39,6 +39,8 @@ extern "C" {
       */
      bool ae_pool_init(ae_res_t *e, ae_pool_t *self, size_t initial_size);
 
+     bool ae_pool_reset(ae_res_t *e, ae_pool_t *self);
+
 
      /** 
 

@@ -31,7 +31,7 @@ static bool ae_test_main(ae_res_t *e)
      memset(&t, 0, sizeof(t));
      AE_TRY(ae_timer_init(e, &t, CLOCK_MONOTONIC));
      struct timespec ts = {.tv_sec = 1, .tv_nsec = 500000000};
-     AE_TRY(ae_timer_every(e, &t, &ts));
+     AE_TRY(ae_timer_every(e, &t, &ts, true));
 
      ae_mux_event_t me;
      memset(&me, 0, sizeof(me));

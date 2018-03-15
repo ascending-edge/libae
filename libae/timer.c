@@ -60,20 +60,18 @@ bool ae_timer_stop(ae_res_t *e, ae_timer_t *self)
 
 
 bool ae_timer_every(ae_res_t *e, ae_timer_t *self,
-                    const struct timespec *interval)
+                    const struct timespec *interval,
+                    bool trigger_now)
 {
-     AE_TRY(ae_timer_set(e, self, 0, interval, interval));
-     return true;
-}
-
-
-bool ae_timer_every_now(ae_res_t *e, ae_timer_t *self,
-                        const struct timespec *interval)
-{
-     struct timespec now;
-     now.tv_sec = 0;
-     now.tv_nsec = 1;
-     AE_TRY(ae_timer_set(e, self, 0, interval, &now));
+     struct timespec now;     
+     const struct timespec *trigger = interval;
+     if(trigger_now)
+     {
+          now.tv_sec = 0;
+          now.tv_nsec = 1;
+          trigger = &now;
+     }
+     AE_TRY(ae_timer_set(e, self, 0, interval, trigger));
      return true;
 }
 

@@ -19,11 +19,8 @@ extern "C" {
      bool ae_timer_stop(ae_res_t *e, ae_timer_t *self);
 
      bool ae_timer_every(ae_res_t *e, ae_timer_t *self,
-                         const struct timespec *interval);
-
-     /* triggers immediately */
-     bool ae_timer_every_now(ae_res_t *e, ae_timer_t *self,
-                             const struct timespec *interval);
+                         const struct timespec *interval,
+                         bool trigger_now);
      
      bool ae_timer_single_shot(ae_res_t *e, ae_timer_t *self,
                                const struct timespec *from_now);

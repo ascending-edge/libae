@@ -10,6 +10,7 @@ libae0_la_CPPFLAGS = \
 
 libae0_la_SOURCES = \
 	ae.c \
+	event.c \
 	io.c \
 	log.c \
 	mux.c \
@@ -25,6 +26,7 @@ libae0_la_SOURCES = \
 headerdir = $(prefix)/include/ae
 header_DATA = \
 	../include/ae/ae.h \
+	../include/ae/event.h \
 	../include/ae/io.h \
 	../include/ae/log.h \
 	../include/ae/misc.h \

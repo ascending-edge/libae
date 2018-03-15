@@ -44,6 +44,13 @@ bool ae_pool_init(ae_res_t *e, ae_pool_t *self, size_t initial_size)
 }
 
 
+bool ae_pool_reset(ae_res_t *e, ae_pool_t *self)
+{
+     self->next = self->start;
+     return true;
+}
+
+
 static bool ae_pool_remap(ae_res_t *e, ae_pool_t *self, size_t more)
 {
      /* how many pages do we need? */
