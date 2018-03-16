@@ -219,6 +219,7 @@ bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
 bool ae_mux_rm(ae_res_t *e, ae_mux_t *self, int fd)
 {
      /* Avoid error for invalid/closed file descriptors */
+     --self->count;
      if(fcntl(fd, F_GETFD, 0) == -1)
 	{
 		return true;

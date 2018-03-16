@@ -10,9 +10,9 @@ to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 ### Added 
 - ae_event_t to wrap eventfd
 - ae_pool_reset()
-
 ### Fixed
 - io.h was missing from the install target in Makefile.am
+- fixed count in ae_mux_rm
 
 ## [0.2.0] 2018-03-10
 ### Added
