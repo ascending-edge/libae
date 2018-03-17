@@ -13,6 +13,7 @@ libae0_la_SOURCES = \
 	event.c \
 	io.c \
 	log.c \
+	misc.c \
 	mux.c \
 	opt.c \
 	pool.c \

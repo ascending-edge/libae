@@ -125,8 +125,28 @@ static bool argument_callback(ae_res_t *e,
 /*      exit(1); */
 /* } */
 
+typedef enum st
+{
+     ST_HEY = 0,
+     ST_THERE,
+     ST_END_MARKER
+} st_t;
+
+const char *hmm(st_t state)
+{
+     const char *MAP[] = {
+          "HEY",
+          "THERE"
+     };
+     return AE_ENUM_TO_STRING(ST_END_MARKER, state, MAP);
+}
+
+
 int main(int argc, char *argv[])
 {
+     printf("%s\n", hmm(4));
+     return 0;
+     
              
      ae_res_t e;
      ae_res_init(&e);
