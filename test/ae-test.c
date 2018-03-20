@@ -80,50 +80,50 @@ static bool argument_callback(ae_res_t *e,
 }
 
 
-/* static bool ae_test_opt(ae_res_t *e, int argc, char **argv) */
-/* { */
-/*      bool nifty = false; */
-/*      int foo = 42; */
-/*      int int_args[] = {-1, 1, 10}; */
-/*      int int_result = 100; */
-/*      ae_opt_option_t options[] = { */
-/*           { */
-/*                .name = "help", */
-/*                .help = "print help", */
-/*                .type = AE_OPT_TYPE_HELP, */
-/*           }, */
-/*           { */
-/*                .name = "version", */
-/*                .help = "print version", */
-/*                .type = AE_OPT_TYPE_VERSION, */
-/*           }, */
-/*           { */
-/*                .name = "Group", */
-/*                .help = "a section", */
-/*                .type = AE_OPT_TYPE_GROUP, */
-/*           }, */
-/*           { */
-/*                .name = "test", */
-/*                .help = "testing", */
-/*                .type = AE_OPT_TYPE_INT, */
-/*           }, */
-/*      }; */
-/*      ae_opt_t opt; */
-/*      AE_TRY(ae_opt_init(e, &opt, "ae-test", "1.0", "help line", */
-/*                         argument_callback, */
-/*                         NULL, */
-/*                         AE_ARRAY_LEN(options), options)); */
-/*      AE_TRY(ae_opt_process(e, &opt, argc, argv)); */
-/*      AE_LD("bool=%d", nifty); */
+static bool ae_test_opt(ae_res_t *e, int argc, char **argv)
+{
+     bool nifty = false;
+     int foo = 42;
+     int int_args[] = {-1, 1, 10};
+     int int_result = 100;
+     ae_opt_option_t options[] = {
+          {
+               .name = "help",
+               .help = "print help",
+               .type = AE_OPT_TYPE_HELP,
+          },
+          {
+               .name = "version",
+               .help = "print version",
+               .type = AE_OPT_TYPE_VERSION,
+          },
+          {
+               .name = "Group",
+               .help = "a section",
+               .type = AE_OPT_TYPE_GROUP,
+          },
+          {
+               .name = "test",
+               .help = "testing",
+               .type = AE_OPT_TYPE_INT,
+          },
+     };
+     ae_opt_t opt;
+     AE_TRY(ae_opt_init(e, &opt, "ae-test", "1.0", "help line",
+                        NULL, /* argument_callback, */
+                        NULL,
+                        AE_ARRAY_LEN(options), options));
+     AE_TRY(ae_opt_process(e, &opt, argc, argv));
+     AE_LD("bool=%d", nifty);
 
-/*      AE_LD("remaining unprocessed args: optind=%d", opt.optind); */
-/*      for(size_t i=opt.optind; i<argc; ++i) */
-/*      { */
-/*           AE_LD("[%zu]='%s'", i, argv[i]); */
-/*      } */
-/*      ae_opt_help_print(&opt, stdout); */
-/*      exit(1); */
-/* } */
+     AE_LD("remaining unprocessed args: optind=%d", opt.optind);
+     for(size_t i=opt.optind; i<argc; ++i)
+     {
+          AE_LD("[%zu]='%s'", i, argv[i]);
+     }
+     /* ae_opt_help_print(&opt, stdout); */
+     exit(1);
+}
 
 typedef enum st
 {
@@ -144,8 +144,8 @@ const char *hmm(st_t state)
 
 int main(int argc, char *argv[])
 {
-     printf("%s\n", hmm(4));
-     return 0;
+     /* printf("%s\n", hmm(4)); */
+     /* return 0; */
      
              
      ae_res_t e;
@@ -159,6 +159,10 @@ int main(int argc, char *argv[])
      openlog("ae-test", LOG_PERROR, LOG_USER);
      g_ae_logger->mask = 0xff;
 
+     if(!ae_test_opt(&e, argc-1, argv+1))
+     {
+          AE_LR(&e);
+     }
      
      if(!ae_test_main(&e))
      {

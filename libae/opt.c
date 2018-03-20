@@ -1,3 +1,8 @@
+/**
+ * @author Greg Rowe <greg.rowe@ascending-edge.com>
+ * 
+ * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
+ */
 #include <ae/opt.h>
 #include <ae/try.h>
 
@@ -532,6 +537,24 @@ static bool ae_opt_argument_is_valid(const char *arg)
      return true;
 }
 
+static bool ae_opt_default_callback(ae_res_t *e, ae_opt_t *self,
+                             const char *argument,
+                             ae_opt_callback_reason_t reason)
+{
+     switch(reason)
+     {
+     case AE_OPT_CALLBACK_REASON_UNKNOWN_ARGUMENT:
+          ae_res_err(e, "unknown option: %s", argument);
+          return false;
+          break;
+     default:
+          break;
+     }
+     return true;
+}
+
+                           
+
 
 bool ae_opt_process(ae_res_t *e, ae_opt_t *self, int argc, char **argv)
 {
@@ -589,12 +612,23 @@ bool ae_opt_process(ae_res_t *e, ae_opt_t *self, int argc, char **argv)
                AE_TRY(ae_opt_option_process(e, self, param, option));
                processed = true;
           }
-          if(!processed
-             && self->callback)
+          if(!processed)
           {
-               AE_TRY(self->callback(e, self, self->ctx,
-                                     arg,
-                                     AE_OPT_CALLBACK_REASON_UNKNOWN_ARGUMENT));
+               if(self->callback)
+               {
+                    AE_TRY(self->callback(
+                                e, self,
+                                self->ctx,
+                                arg,
+                                AE_OPT_CALLBACK_REASON_UNKNOWN_ARGUMENT));
+               }
+               else
+               {
+                    AE_TRY(ae_opt_default_callback(
+                                e, self,
+                                arg,
+                                AE_OPT_CALLBACK_REASON_UNKNOWN_ARGUMENT));
+               }
           }
      }
      return true;
