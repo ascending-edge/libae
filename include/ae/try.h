@@ -2,33 +2,6 @@
  * @author Greg Rowe <greg.rowe@ascending-edge.com>
  * 
  * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
- * 
- * 
- */
-
-/**
- * @author Greg Rowe <greg.rowe@ascending-edge.com>
- * 
- Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
- * 
- * 
- */
-/**
- * @author Greg Rowe <greg.rowe@ascending-edge.com>
- * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
- * 
- * 
- */
-/**
- * @author Greg Rowe <greg.rowe@ascending-edge.com>
- * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
- * 
- * 
- */
-/**
- * @author Greg Rowe <greg.rowe@ascending-edge.com>
- * 
- * Copyright (C) 2018 Ascending Edge, LLC - All Rights Reserved
  */
 #ifndef _AE_TRY_H
 #define _AE_TRY_H
