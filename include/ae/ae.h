@@ -24,6 +24,13 @@
 #include <ae/try.h>
 #include <ae/types.h>
 
+#ifdef __GNUC__
+#define AE_PRINTF_ARGS(a,b) __attribute__ ((format (printf, a, b)))
+#else
+#define AE_PRINTF_ARGS(a,b) 
+#endif
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
