@@ -6,9 +6,10 @@
 #ifndef _AE_MUX_H
 #define _AE_MUX_H
 
-#include <ae/res.h>
 #include <sys/epoll.h>
 
+#include <ae/res.h>
+#include <ae/threadpool.h>
 
 /**
  * This class makes it easy to use epoll (or some other multiplexing
@@ -76,6 +77,13 @@ extern "C" {
       */
      bool ae_mux_add(ae_res_t *e, ae_mux_t *self,
                      int fd, const ae_mux_event_t *d);
+
+
+     /** 
+      * This removes a file descriptor from the event wrapper.
+      *
+      * @param fd the file descriptor to remove
+      */
      bool ae_mux_rm(ae_res_t *e, ae_mux_t *self, int fd);
 
 
@@ -99,10 +107,12 @@ extern "C" {
       * NULL then the boolean pointed to will be set to true.
       */
      bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
+                      ae_threadpool_t *threadpool,
                       struct epoll_event *events,
                       size_t n_events,
                       int timeout_ms,
                       bool *out_was_timeout);
+
 
 #ifdef __cplusplus
 }

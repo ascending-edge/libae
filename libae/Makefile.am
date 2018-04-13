@@ -20,6 +20,7 @@ libae0_la_SOURCES = \
 	ptrarray.c \
 	res.c \
 	str.c \
+	threadpool.c \
 	time.c \
 	timer.c 
 

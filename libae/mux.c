@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include <ae/try.h>
+#include <ae/log.h>
 
 
 bool ae_mux_uninit(ae_res_t *e, ae_mux_t *self)
@@ -31,23 +32,7 @@ bool ae_mux_init(ae_res_t *e, ae_mux_t *self)
 }
 
 
-/* bool st_ep_mod(st_err_t *err, st_ep_t *self, int events, st_ep_entry_t *entry) */
-/* { */
-/* 	struct epoll_event event; */
-/* 	memset(&event, 0, sizeof(event)); */
-/* 	event.events = events; */
-/* 	event.data.ptr = entry; */
-
-/* 	if(epoll_ctl(self->fd, EPOLL_CTL_MOD, entry->fd, &event) == -1) */
-/* 	{ */
-/* 		ST_ERR_SET(err, "epoll_ctl(%d): %s", entry->fd, strerror(errno)); */
-/* 		return false; */
-/* 	} */
-/* 	return true; */
-/* } */
-
-
-bool ae_mux_add(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
+static uint32_t ae_mux_event_to_flags(const ae_mux_event_t *d)
 {
      uint32_t events = 0;
      if(d->read)
@@ -75,6 +60,16 @@ bool ae_mux_add(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
      /* if(d->error) */
      /* { */
      /* } */
+     
+     return events;
+}
+
+
+static bool ae_mux_ctl(ae_res_t *e, ae_mux_t *self,
+                       int fd, const ae_mux_event_t *d,
+                       int op)
+{
+     uint32_t events = ae_mux_event_to_flags(d);
 
 	struct epoll_event event;
      event.events = events;
@@ -82,14 +77,28 @@ bool ae_mux_add(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
 
      /* fprintf(stderr, "cb=%p ctx=%p\n", info->cb, info->ctx); */
      
-     
-	if(epoll_ctl(self->epoll_fd, EPOLL_CTL_ADD, fd, &event) == -1)
+	if(epoll_ctl(self->epoll_fd, op, fd, &event) == -1)
 	{
 		ae_res_err(e, "epoll: %s", strerror(errno));
 		return false;
 	}
 	++self->count;
 	return true;
+
+}
+                              
+
+bool ae_mux_add(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
+{
+     AE_TRY(ae_mux_ctl(e, self, fd, d, EPOLL_CTL_ADD));
+     return true;
+}
+
+
+bool ae_mux_mod(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
+{
+     AE_TRY(ae_mux_ctl(e, self, fd, d, EPOLL_CTL_MOD));
+     return true;
 }
 
 
@@ -112,7 +121,124 @@ static bool ae_mux_now_get(ae_res_t *e, uint64_t *now_ms)
 }
 
 
+static void ae_mux_singlethread_handler(ae_mux_t *self,
+                                        struct epoll_event *event)
+{
+     uint32_t events = event->events;
+     ae_mux_event_t *info = event->data.ptr;
+     if((events & EPOLLIN)
+        && info->read)
+     {
+          info->read(self, event, info->ctx);
+     }
+     if((events & EPOLLOUT)
+        && info->write)
+     {
+          info->write(self, event, info->ctx);
+     }
+     if(((events & EPOLLRDHUP)
+         || events & EPOLLHUP)
+        && info->hangup)
+     {
+          info->hangup(self, event, info->ctx);
+     }
+     if((events & EPOLLPRI)
+        && info->priority)
+     {
+          info->priority(self, event, info->ctx);
+     }
+     if((events & EPOLLERR)
+        && info->error)
+     {
+          info->error(self, event, info->ctx);
+     }
+}
+
+
+static bool ae_mux_barrier_wait(ae_res_t *e, pthread_barrier_t *barrier)
+{
+     int res = pthread_barrier_wait(barrier);
+/* RETURN VALUE */
+/*        Upon successful completion, the pthread_barrier_wait()
+ *        function shall */
+/*        return PTHREAD_BARRIER_SERIAL_THREAD for a single
+ *        (arbitrary) thread */
+/*        synchronized at the barrier and zero for each of the other
+ *        threads. */
+/*        Otherwise, an error number shall be returned to indicate the
+ *        error. */
+     
+     /* PTHREAD_BARRIER_SERIAL_THREAD      */
+     if(res != 0)
+     {
+          AE_LW("pthread barrier wait: %s", strerror(res));
+     }
+     return true;
+}
+
+
+static void ae_mux_multithread_handler(void *_args)
+{
+     void **args = _args;
+     ae_mux_t *self = args[0];
+     struct epoll_event *event = args[1];
+     pthread_barrier_t *barrier = args[2];
+     ae_mux_singlethread_handler(self, event);
+
+     ae_res_t e;
+     ae_res_init(&e);
+     ae_mux_barrier_wait(&e, barrier);
+     AE_LR(&e);
+}
+
+
+static void ae_mux_threadpool_add(ae_mux_t *self,
+                                  ae_pool_t *mempool,
+                                  struct epoll_event *event,
+                                  ae_threadpool_t *thread_pool,
+                                  pthread_barrier_t *barrier)
+{
+     /** @todo allocate the job and the arguments from mempool */
+     ae_threadpool_job_t job;
+     job.func = ae_mux_multithread_handler;
+     void *args[] = {self, event, barrier};
+     job.args = args;
+
+     ae_res_t e;
+     ae_res_init(&e);
+     /* ae_threadpool_enqueue(&e, thread_pool, &job); */
+     AE_LR(&e);
+}
+
+
+static bool ae_mux_barrier_init(ae_res_t *e,
+                                pthread_barrier_t *barrier,
+                                unsigned int count)
+{
+     int res = pthread_barrier_init(barrier, NULL, count);
+     if(res != 0)
+     {
+          ae_res_err(e, "pthread barrier init: %s", strerror(res));
+          return false;
+     }
+     return true;
+}
+
+
+static bool ae_mux_barrier_uninit(ae_res_t *e, pthread_barrier_t *barrier)
+{
+     int res = pthread_barrier_destroy(barrier);
+     if(res != 0)
+     {
+          ae_res_err(e, "pthread barrier destroy: %s", strerror(res));
+          return false;
+     }     
+     return true;
+}
+
+
 bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
+                 ae_threadpool_t *threadpool,
                  struct epoll_event *events,
                  size_t n_events,
                  int timeout_ms,
@@ -178,40 +304,38 @@ bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
 		return false;
 	}
 
+     pthread_barrier_t barrier;
+     ae_pool_t mempool;
+     memset(&mempool, 0, sizeof(mempool));
+     if(threadpool)
+     {
+          /* create a barrier.  Each FD must check in. */
+          /* AE_TRY(ae_pool_init(e, &mempool, res * ?)); */
+          AE_TRY(ae_mux_barrier_init(e, &barrier, res));
+     }
 	/* res is not 0, and it isn't less than zero, so an event
-	 * occurred.  Process all handles with events. */
+	 * occurred.  Submit each FD to a threadpool or handle in this
+	 * thread. */
 	for(int i=0; i<res; ++i)
 	{
           struct epoll_event *event = &events[i];
-          uint32_t events = event->events;
-		ae_mux_event_t *info = event->data.ptr;
-          if((events & EPOLLIN)
-             && info->read)
+          if(threadpool)
           {
-               info->read(self, event, info->ctx);
+               /* ae_mux_threadpool_add(self, event, threadpool, &barrier); */
           }
-          if((events & EPOLLOUT)
-             && info->write)
+          else
           {
-               info->write(self, event, info->ctx);
-          }
-          if(((events & EPOLLRDHUP)
-              || events & EPOLLHUP)
-             && info->hangup)
-          {
-               info->hangup(self, event, info->ctx);
-          }
-          if((events & EPOLLPRI)
-             && info->priority)
-          {
-               info->priority(self, event, info->ctx);
-          }
-          if((events & EPOLLERR)
-             && info->error)
-          {
-               info->error(self, event, info->ctx);
+               ae_mux_singlethread_handler(self, event);
           }
 	}
+
+     /* wait for everything to finish */
+     if(threadpool)
+     {
+          ae_mux_barrier_wait(e, &barrier);
+          ae_mux_barrier_uninit(e, &barrier);
+     }
+
 	return true;
 }
 
@@ -232,32 +356,3 @@ bool ae_mux_rm(ae_res_t *e, ae_mux_t *self, int fd)
      --self->count;
 	return true;
 }
-
-/* bool st_ep_rm(st_err_t *err, st_ep_t *self, st_ep_entry_t *entry) */
-/* { */
-/* 	if(!entry) */
-/* 	{ */
-/* 		ST_ERR_SET(err, "%s", "invalid entry"); */
-/* 		return false; */
-/* 	} */
-
-/* 	if(fcntl(entry->fd, F_GETFD, 0) == -1) */
-/* 	{ */
-/* 		return true; */
-/* 	} */
-
-/* 	if(epoll_ctl(self->fd, EPOLL_CTL_DEL, entry->fd, NULL) == -1) */
-/* 	{ */
-/* 		ST_ERR_SET(err, "epoll(%d): %s", entry->fd, strerror(errno)); */
-/* 		return false; */
-/* 	} */
-
-/* 	return true; */
-/* } */
-
-
-/* size_t st_ep_get_count(const st_ep_t *self) */
-/* { */
-/* 	return self->count; */
-/* } */
-
