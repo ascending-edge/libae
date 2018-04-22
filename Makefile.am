@@ -7,5 +7,5 @@ ACLOCAL_AMFLAGS = -I m4
 source-release:
 	git archive $$(cat version.txt) \
 	--prefix libae/ \
-	--output ../../Releases/libae-$$(cat version.txt).tar.gz
+	--output ../Releases/libae-$$(cat version.txt).tar.gz
 
