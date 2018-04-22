@@ -44,7 +44,7 @@ static bool ae_test_main(ae_res_t *e)
      for(;;)
      {
           bool was_to = false;
-          AE_TRY(ae_mux_wait(e, &mux,
+          AE_TRY(ae_mux_wait(e, &mux, NULL,
                              events, AE_ARRAY_LEN(events),
                              1500, &was_to));
           AE_LD("mux wait exit was_to=%s", was_to ? "true":"false");

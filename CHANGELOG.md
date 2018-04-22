@@ -6,11 +6,12 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [UNRELEASED] 2018-03-12
+## [0.2.1] 2018-04-22
 ### Added 
 - ae_event_t to wrap eventfd
 - ae_pool_reset()
 - default handler for missing options
+- partially added support for threadpool to mux
 ### Fixed
 - io.h was missing from the install target in Makefile.am
 - fixed count in ae_mux_rm
