@@ -151,7 +151,7 @@ static void ae_server_client_rm(ae_mux_t *mux, int fd, void *ctx)
      ae_mux_rm(&e, mux, fd);
      if(close(fd) == -1)
      {
-          ae_res_err("close: %s", strerror(errno));
+          ae_res_err(&e, "close: %s", strerror(errno));
      }
      AE_LR(&e);
      free(ctx);
