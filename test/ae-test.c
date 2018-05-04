@@ -21,38 +21,38 @@ static void ae_test_read(ae_mux_t *self,
 }
 
 
-static bool ae_test_main(ae_res_t *e)
-{
-     ae_mux_t mux;
-     memset(&mux, 0, sizeof(mux));
-     AE_TRY(ae_mux_init(e, &mux));
+/* static bool ae_test_main(ae_res_t *e) */
+/* { */
+/*      ae_mux_t mux; */
+/*      memset(&mux, 0, sizeof(mux)); */
+/*      AE_TRY(ae_mux_init(e, &mux)); */
 
-     ae_timer_t t;
-     memset(&t, 0, sizeof(t));
-     AE_TRY(ae_timer_init(e, &t, CLOCK_MONOTONIC));
-     struct timespec ts = {.tv_sec = 1, .tv_nsec = 500000000};
-     AE_TRY(ae_timer_every(e, &t, &ts, true));
+/*      ae_timer_t t; */
+/*      memset(&t, 0, sizeof(t)); */
+/*      AE_TRY(ae_timer_init(e, &t, CLOCK_MONOTONIC)); */
+/*      struct timespec ts = {.tv_sec = 1, .tv_nsec = 500000000}; */
+/*      AE_TRY(ae_timer_every(e, &t, &ts, true)); */
 
-     ae_mux_event_t me;
-     memset(&me, 0, sizeof(me));
-     me.ctx = &t;
-     me.read = ae_test_read;
+/*      ae_mux_event_t me; */
+/*      memset(&me, 0, sizeof(me)); */
+/*      me.ctx = &t; */
+/*      me.read = ae_test_read; */
 
-     AE_TRY(ae_mux_add(e, &mux, t.fd, &me));
+/*      AE_TRY(ae_mux_add(e, &mux, t.fd, &me)); */
 
-     struct epoll_event events[1];
-     for(;;)
-     {
-          bool was_to = false;
-          AE_TRY(ae_mux_wait(e, &mux, NULL,
-                             events, AE_ARRAY_LEN(events),
-                             1500, &was_to));
-          AE_LD("mux wait exit was_to=%s", was_to ? "true":"false");
-     }
+/*      struct epoll_event events[1]; */
+/*      for(;;) */
+/*      { */
+/*           bool was_to = false; */
+/*           AE_TRY(ae_mux_wait(e, &mux, NULL, */
+/*                              events, AE_ARRAY_LEN(events), */
+/*                              1500, &was_to)); */
+/*           AE_LD("mux wait exit was_to=%s", was_to ? "true":"false"); */
+/*      } */
      
-     ae_mux_uninit(e, &mux);
-     return true;
-}
+/*      ae_mux_uninit(e, &mux); */
+/*      return true; */
+/* } */
 
 void log_out(void *ctx, ae_log_level_t lvl, const char *msg)
 {
@@ -142,6 +142,57 @@ const char *hmm(st_t state)
 }
 
 
+static bool on_client_add(struct ae_server *server, int fd, void **ctx)
+{
+     AE_LT(__FUNCTION__);
+     return true;
+}
+static void on_client_rm(struct ae_server *server, void *ctx, int fd)
+{
+     AE_LT(__FUNCTION__);
+}
+static void on_client_read(struct ae_server *server, void *ctx, int fd)
+{
+     AE_LT(__FUNCTION__);
+}
+static void on_client_write(struct ae_server *server, void *ctx, int fd)
+{
+     AE_LT(__FUNCTION__);
+}
+
+
+static ae_server_handler_t s_handlers =
+{
+     .on_client_add = on_client_add,
+     .on_client_rm = on_client_rm,
+     .on_client_read = on_client_read,
+     .on_client_write = on_client_write,
+};
+
+static bool ae_test_server(ae_res_t *e)
+{
+     ae_mux_t mux;
+     AE_MEM_CLEAR(&mux);
+     AE_TRY(ae_mux_init(e, &mux));
+     
+     ae_server_t server;
+     AE_MEM_CLEAR(&server);
+     AE_TRY(ae_server_init(e, &server));
+     AE_TRY(ae_server_cfg(e, &server, &mux, &s_handlers, NULL));
+     AE_TRY(ae_server_bind_unix(e, &server, "/tmp/server"));
+     AE_TRY(ae_server_listen(e, &server));
+
+     for(;;)
+     {
+          struct epoll_event events[1];
+          AE_TRY(ae_mux_wait(e, &mux, NULL, events, 1, -1, NULL));
+     }
+     
+     ae_server_uninit(e, &server);
+     ae_mux_uninit(e, &mux);
+     
+}
+
 int main(int argc, char *argv[])
 {
      /* printf("%s\n", hmm(4)); */
@@ -157,18 +208,24 @@ int main(int argc, char *argv[])
           return 1;
      }
      openlog("ae-test", LOG_PERROR, LOG_USER);
+     AE_LD("hey");
      g_ae_logger->mask = 0xff;
 
-     if(!ae_test_opt(&e, argc-1, argv+1))
-     {
-          AE_LR(&e);
-     }
+     /* if(!ae_test_opt(&e, argc-1, argv+1)) */
+     /* { */
+     /*      AE_LR(&e); */
+     /* } */
      
-     if(!ae_test_main(&e))
+     /* if(!ae_test_main(&e)) */
+     /* { */
+     /*      AE_LR(&e); */
+     /* } */
+
+
+     if(!ae_test_server(&e))
      {
           AE_LR(&e);
      }
-
      if(!ae_global_uninit(&e))
      {
           AE_LR(&e);

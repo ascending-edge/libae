@@ -30,22 +30,25 @@ typedef struct ae_mux
  * @param event the fd/event that was triggered  (see epoll.h)
  * @param ctx the context pointer that was registered with the fd/event
  */
-typedef void (*ae_mux_cb_t)(ae_mux_t *self,
-                            const struct epoll_event *event,
-                            void *ctx);
+typedef void (*ae_mux_cb_t)(ae_mux_t *self, int fd, void *ctx);
 
+typedef struct ae_mux_handlers
+{
+     ae_mux_cb_t read;        /**< read event callback */
+     ae_mux_cb_t write;       /**< write event callback */
+     ae_mux_cb_t hangup;      /**< hangup event callback */
+     ae_mux_cb_t priority;    /**< priority data event callback */
+     ae_mux_cb_t error;       /**< error event callback */
+} ae_mux_handlers_t;
 
 /**
  * This is used for registering a fd/event.  Any field can be NULL.
  */
 typedef struct ae_mux_event
 {
+     int fd;
      void *ctx;               /**< arbitrary context */
-     ae_mux_cb_t read;        /**< read event callback */
-     ae_mux_cb_t write;       /**< write event callback */
-     ae_mux_cb_t hangup;      /**< hangup event callback */
-     ae_mux_cb_t priority;    /**< priority data event callback */
-     ae_mux_cb_t error;       /**< error event callback */
+     ae_mux_handlers_t *handlers;
 } ae_mux_event_t;
 
 
@@ -68,15 +71,8 @@ extern "C" {
      bool ae_mux_init(ae_res_t *e, ae_mux_t *self);
 
 
-     /** 
-      * This adds a file descriptor to the event wrapper.
-      *
-      * @param fd the file descriptor to monitor
-      * 
-      * @param d the callbacks.  These must exist, this is not copied.
-      */
      bool ae_mux_add(ae_res_t *e, ae_mux_t *self,
-                     int fd, const ae_mux_event_t *d);
+                     const ae_mux_event_t *d);
 
 
      /** 

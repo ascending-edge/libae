@@ -35,23 +35,28 @@ bool ae_mux_init(ae_res_t *e, ae_mux_t *self)
 static uint32_t ae_mux_event_to_flags(const ae_mux_event_t *d)
 {
      uint32_t events = 0;
-     if(d->read)
+     if(!d->handlers)
+     {
+          return events;
+     }
+
+     if(d->handlers->read)
      {
           events |= EPOLLIN;
      }
-     if(d->write)
+     if(d->handlers->write)
      {
           events |= EPOLLOUT;
      }
-     if(d->write)
+     if(d->handlers->write)
      {
           events |= EPOLLOUT;
      }
-     if(d->hangup)
+     if(d->handlers->hangup)
      {
           events |= EPOLLRDHUP;
      }
-     if(d->priority)
+     if(d->handlers->priority)
      {
           events |= EPOLLPRI;
      }
@@ -66,7 +71,7 @@ static uint32_t ae_mux_event_to_flags(const ae_mux_event_t *d)
 
 
 static bool ae_mux_ctl(ae_res_t *e, ae_mux_t *self,
-                       int fd, const ae_mux_event_t *d,
+                       const ae_mux_event_t *d,
                        int op)
 {
      uint32_t events = ae_mux_event_to_flags(d);
@@ -77,27 +82,27 @@ static bool ae_mux_ctl(ae_res_t *e, ae_mux_t *self,
 
      /* fprintf(stderr, "cb=%p ctx=%p\n", info->cb, info->ctx); */
      
-	if(epoll_ctl(self->epoll_fd, op, fd, &event) == -1)
+	if(epoll_ctl(self->epoll_fd, op, d->fd, &event) == -1)
 	{
 		ae_res_err(e, "epoll: %s", strerror(errno));
 		return false;
 	}
 	++self->count;
 	return true;
-
 }
                               
 
-bool ae_mux_add(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
+bool ae_mux_add(ae_res_t *e, ae_mux_t *self, const ae_mux_event_t *d)
 {
-     AE_TRY(ae_mux_ctl(e, self, fd, d, EPOLL_CTL_ADD));
+     AE_LD("adding %p, fd=%d", d, d->fd);
+     AE_TRY(ae_mux_ctl(e, self, d, EPOLL_CTL_ADD));
      return true;
 }
 
 
 bool ae_mux_mod(ae_res_t *e, ae_mux_t *self, int fd, const ae_mux_event_t *d)
 {
-     AE_TRY(ae_mux_ctl(e, self, fd, d, EPOLL_CTL_MOD));
+     AE_TRY(ae_mux_ctl(e, self, d, EPOLL_CTL_MOD));
      return true;
 }
 
@@ -121,36 +126,42 @@ static bool ae_mux_now_get(ae_res_t *e, uint64_t *now_ms)
 }
 
 
-static void ae_mux_singlethread_handler(ae_mux_t *self,
+static void ae_mux_singlethread_handler(ae_mux_t *self, 
                                         struct epoll_event *event)
 {
      uint32_t events = event->events;
      ae_mux_event_t *info = event->data.ptr;
-     if((events & EPOLLIN)
-        && info->read)
+     AE_LD("info: %p", info);
+     if(!info->handlers)
      {
-          info->read(self, event, info->ctx);
+          AE_LW("mux event with no handlers...what's the point?");
+          return;
+     }
+     if((events & EPOLLIN)
+        && info->handlers->read)
+     {
+          info->handlers->read(self, info->fd, info->ctx);
      }
      if((events & EPOLLOUT)
-        && info->write)
+        && info->handlers->write)
      {
-          info->write(self, event, info->ctx);
+          info->handlers->write(self, info->fd, info->ctx);
      }
      if(((events & EPOLLRDHUP)
          || events & EPOLLHUP)
-        && info->hangup)
+        && info->handlers->hangup)
      {
-          info->hangup(self, event, info->ctx);
+          info->handlers->hangup(self, info->fd, info->ctx);
      }
      if((events & EPOLLPRI)
-        && info->priority)
+        && info->handlers->priority)
      {
-          info->priority(self, event, info->ctx);
+          info->handlers->priority(self, info->fd, info->ctx);
      }
      if((events & EPOLLERR)
-        && info->error)
+        && info->handlers->error)
      {
-          info->error(self, event, info->ctx);
+          info->handlers->error(self, info->fd, info->ctx);
      }
 }
 

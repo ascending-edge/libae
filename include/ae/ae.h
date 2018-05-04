@@ -18,6 +18,7 @@
 #include <ae/pool.h>
 #include <ae/ptrarray.h>
 #include <ae/res.h>
+#include <ae/server.h>
 #include <ae/str.h>
 #include <ae/time.h>
 #include <ae/timer.h>

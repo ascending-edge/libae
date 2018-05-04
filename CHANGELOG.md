@@ -6,6 +6,13 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] 2018-05-03
+### Added 
+- ae_server_t for connection oriented servers (currently with unix
+  socket support)
+### Changed 
+- changed mux_event to be less wasteful
+
 ## [0.2.1] 2018-04-22
 ### Added 
 - ae_event_t to wrap eventfd
@@ -14,7 +21,7 @@ to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 - partially added support for threadpool to mux
 ### Fixed
 - io.h was missing from the install target in Makefile.am
-- fixed count in ae_mux_rm
+- fixed count in ae_mux_mrw
 
 ## [0.2.0] 2018-03-10
 ### Added

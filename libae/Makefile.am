@@ -19,6 +19,7 @@ libae0_la_SOURCES = \
 	pool.c \
 	ptrarray.c \
 	res.c \
+	server.c \
 	str.c \
 	threadpool.c \
 	time.c \
@@ -37,6 +38,7 @@ header_DATA = \
 	../include/ae/pool.h \
 	../include/ae/ptrarray.h \
 	../include/ae/res.h \
+	../include/ae/server.h \
 	../include/ae/str.h \
 	../include/ae/time.h \
 	../include/ae/timer.h \
