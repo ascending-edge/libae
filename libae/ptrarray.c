@@ -8,7 +8,7 @@ bool ae_ptrarray_grow_capacity(ae_res_t *e, ae_ptrarray_t *self,
      size_t new_capacity = self->capacity + increase_by;
      void *new = NULL;
      AE_TRY(ae_pool_realloc(e, self->pool,
-                            self->data, self->len,
+                            self->data, self->len * sizeof(self->data[0]),
                             &new, new_capacity * sizeof(self->data[0])));
      self->capacity = new_capacity;
      self->data = new;

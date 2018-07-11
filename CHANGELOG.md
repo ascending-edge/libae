@@ -6,6 +6,12 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [VERSION] DATE
+### Fixed
+- fixed serious bug in ptrarray that caused it to allocate too few
+  slots
+
+
 ## [1.0.0] 2018-05-03
 ### Added 
 - ae_server_t for connection oriented servers (currently with unix
