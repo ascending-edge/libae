@@ -10,6 +10,8 @@ to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 ### Fixed
 - fixed serious bug in ptrarray that caused it to allocate too few
   slots
+- added threadpool.h to makefile.am
+- changed DEFFILEMODE to S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH because DEFFILEMODE cant be found. (this was being used in an old version)
 
 
 ## [1.0.0] 2018-05-03
