@@ -12,6 +12,7 @@ to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
   slots
 - added threadpool.h to makefile.am
 - changed DEFFILEMODE to S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH because DEFFILEMODE cant be found. (this was being used in an old version)
+- added empty m4 folder with .gitempty file. this prevented buildroot based builds and other autoreconf based builds from automatically configuring.
 
 
 ## [1.0.0] 2018-05-03
