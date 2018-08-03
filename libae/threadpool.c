@@ -94,7 +94,9 @@ bool ae_threadpool_init(ae_res_t *e, ae_threadpool_t *self,
 	attr.mq_maxmsg = 10;
 	attr.mq_msgsize = sizeof(ae_threadpool_msg_t);
 
-	self->queue = mq_open(name, O_RDWR|O_CREAT, DEFFILEMODE, &attr);
+	self->queue = mq_open(name, O_RDWR|O_CREAT,
+                       S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH,
+						&attr);
 	if(self->queue == -1)
 	{
 		ae_res_err(e, "open: %s", strerror(errno));
