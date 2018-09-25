@@ -6,13 +6,17 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [VERSION] DATE
+## [1.0.1] 2018-09-23
 ### Fixed
 - fixed serious bug in ptrarray that caused it to allocate too few
   slots
-- added threadpool.h to makefile.am
-- changed DEFFILEMODE to S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH because DEFFILEMODE cant be found. (this was being used in an old version)
-- added empty m4 folder with .gitempty file. this prevented buildroot based builds and other autoreconf based builds from automatically configuring.
+- added threadpool.h to Makefile.am
+- changed DEFFILEMODE to S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
+  S_IROTH | S_IWOTH because DEFFILEMODE can'tt be found. (this was
+  being used in an old version)
+- added empty m4 folder with .gitempty file. this prevented buildroot
+  based builds and other autoreconf based builds from automatically
+  configuring.
 
 
 ## [1.0.0] 2018-05-03
