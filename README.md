@@ -21,6 +21,10 @@ these parameters when they are used in the typical manner (it would be
 highly redundant busy work).
 
 # Option Parsing
+Please note that the option parsing currently has a number of flaws!
+If you use it you very likely will need to debug in libae (please send
+patches).
+
 The option parser in libae makes it easy to have a robust set of
 command line arguments.  Help output is automatically generated from
 the options table.  Handling common argument types is also provided
