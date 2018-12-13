@@ -65,7 +65,6 @@ static uint32_t ae_mux_event_to_flags(const ae_mux_event_t *d)
      /* if(d->error) */
      /* { */
      /* } */
-     
      return events;
 }
 
@@ -81,16 +80,29 @@ static bool ae_mux_ctl(ae_res_t *e, ae_mux_t *self,
      event.data.ptr = (void*)d;
 
      /* fprintf(stderr, "cb=%p ctx=%p\n", info->cb, info->ctx); */
-     
-	if(epoll_ctl(self->epoll_fd, op, d->fd, &event) == -1)
+
+     if(epoll_ctl(self->epoll_fd, op, d->fd, &event) == -1)
 	{
+          /* No worries mate! Let's modify the entry instead. */
+          if((op == EPOLL_CTL_ADD)
+             && (errno == EEXIST))
+          {
+               if(epoll_ctl(self->epoll_fd, EPOLL_CTL_MOD, d->fd, &event) == -1)
+               {
+                    ae_res_err(e, "epoll: %s", strerror(errno));
+                    return false;
+               }
+               goto exit_success;
+          }
 		ae_res_err(e, "epoll: %s", strerror(errno));
 		return false;
 	}
-	++self->count;
+
+exit_success:
+     ++self->count;
 	return true;
 }
-                              
+
 
 bool ae_mux_add(ae_res_t *e, ae_mux_t *self, const ae_mux_event_t *d)
 {
@@ -348,6 +360,17 @@ bool ae_mux_wait(ae_res_t *e, ae_mux_t *self,
      }
 
 	return true;
+}
+
+
+bool ae_mux_wait_st(ae_res_t *e, ae_mux_t *self,
+                    struct epoll_event *events,
+                    size_t n_events,
+                    int timeout_ms,
+                    bool *out_was_timeout)
+{
+     return ae_mux_wait(e, self, NULL, events, n_events,
+                        timeout_ms, out_was_timeout);
 }
 
 

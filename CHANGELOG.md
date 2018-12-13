@@ -6,6 +6,14 @@ on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this
 project adheres
 to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] 2018-10-06
+### Added
+- if ae_mux_add is called on a file that is already in the mux it will
+  be tried again using using EPOLL_CTL_MOD
+- ae_mux_wait_st as a convenience call for single threaded
+  handlers. This is handy since the threadpool implementation isn't
+  working properly yet.
+
 ## [1.0.1] 2018-09-23
 ### Fixed
 - fixed serious bug in ptrarray that caused it to allocate too few
