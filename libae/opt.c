@@ -255,11 +255,6 @@ static bool ae_opt_option_process(ae_res_t *e, ae_opt_t *self,
           ++self->optind;
      }
 
-     if(option->callback)
-     {
-          AE_TRY(option->callback(e, self, option, param));
-     }
-
      /* Is this something we handle internally? */
      switch(option->type)
      {
